@@ -8,9 +8,10 @@ RUN     yum install -y npm
 RUN npm install supervisor -g
 
 # Bundle app source
-COPY . /src
+COPY . /app/
+
 # Install app dependencies
-RUN cd /src; npm install
+RUN cd /app/src; npm install
 
 EXPOSE  8080
-CMD cd /src && npm start
+CMD cd /app/src && npm start
