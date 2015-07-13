@@ -5,10 +5,7 @@ RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-
 # Install Node.js and npm
 RUN     yum install -y npm
 
-RUN yum install -y supervisor
-RUN mkdir -p /var/log/supervisor
-
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN npm install supervisor -g
 
 # Bundle app source
 COPY . /src
@@ -16,5 +13,4 @@ COPY . /src
 RUN cd /src; npm install
 
 EXPOSE  8080
-CMD ["node", "/src/index.js"]
-CMD ["/usr/bin/supervisord"]
+CMD cd /src && npm start
