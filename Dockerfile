@@ -5,6 +5,11 @@ RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-
 # Install Node.js and npm
 RUN     yum install -y npm
 
+RUN yum -y update; yum clean all
+RUN yum -y install epel-release; yum clean all
+RUN yum -y install mongodb-server; yum clean all
+RUN mkdir -p /data/db
+
 RUN npm install supervisor -g
 
 # Bundle app source
@@ -14,4 +19,4 @@ COPY . /app/
 RUN cd /app/src; npm install
 
 EXPOSE  8080
-CMD cd /app/src && npm start
+CMD /usr/bin/mongod --fork --logpath /var/log/mongodb.log && cd /app/src && npm start
