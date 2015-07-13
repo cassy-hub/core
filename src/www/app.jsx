@@ -1,4 +1,9 @@
-React.render(
-  <h1>Hello, world!</h1>,
-  document.getElementById('mainAppWindow')
-);
+  $.get('/api/', function(data) {
+    React.render(
+      <div>
+        <h3>API Response:</h3>
+        <p>{data}</p>
+      </div>,
+      document.getElementById('mainAppWindow')
+    );
+  })
