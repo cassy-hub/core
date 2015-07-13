@@ -9,6 +9,6 @@
     "mongodb": "~2.0"
   },
   "scripts": {
-    "start": "forever start index.js && forever list"
+    "start": "forever -w start index.js"
   }
 }
