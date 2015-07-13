@@ -1,21 +1,20 @@
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
 var express = require('express');
 
 // Constants
 var PORT = 8080;
 
-var MongoClient = require('mongodb').MongoClient
-    , assert = require('assert');
-
 // App
 var app = express();
-express.static('www');
+app.use(express.static('www'));
 
 app.get('/', function (req, res) {
   res.sendfile('www/index.html');
 });
 
 app.get('/api/', function (req, res) {
-  
+
 // Connection URL
   var url = 'mongodb://localhost:27017/cassy';
 // Use connect method to connect to the Server
@@ -25,7 +24,7 @@ app.get('/api/', function (req, res) {
       findDocuments(db, function(result){
         res.send('Hit me baby ' + result.length + ' time!!');
         db.close();
-      })
+      });
     });
   });
 
@@ -41,7 +40,7 @@ var findDocuments = function(db, callback) {
     console.dir(docs);
     callback(docs);
   });
-}
+};
 
 var insertDocuments = function(db, callback) {
   // Get the documents collection
@@ -53,7 +52,7 @@ var insertDocuments = function(db, callback) {
     assert.equal(err, null);
     callback(result);
   });
-}
+};
 
 app.listen(PORT);
 console.log('Running on http://localhost:' + PORT);
