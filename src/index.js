@@ -5,9 +5,15 @@ var PORT = 8080;
 
 // App
 var app = express();
+app.use(express.static('www'));
+
 app.get('/', function (req, res) {
-  var MongoClient = require('mongodb').MongoClient
-      , assert = require('assert');
+  res.sendfile('www/index.html');
+});
+
+app.get('/api/', function (req, res) {
+  var MongoClient = require('mongodb').MongoClient;
+  var assert = require('assert');
 
 // Connection URL
   var url = 'mongodb://localhost:27017/cassy';
