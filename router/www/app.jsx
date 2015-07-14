@@ -9,6 +9,9 @@ var DemoPage = React.createClass({
       dataType: 'json',
       method: 'post',
       cache: false,
+      data: {
+        hello: "world"
+      },
       success: function(data) {
         console.log('success', data);
       }.bind(this),
