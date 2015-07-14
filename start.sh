@@ -1,10 +1,11 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Clean up old docker containers
-docker rm $(docker stop $(docker ps -a -f "name=mongo" -q))
-docker rm $(docker stop $(docker ps -a -f "name=cassyhub-dal" -q))
-docker rm $(docker stop $(docker ps -a -f "name=cassyhub-api" -q))
-docker rm $(docker stop $(docker ps -a -f "name=cassyhub-router" -q))
+docker rm $(docker stop $(docker ps -a -q))
+#docker rm $(docker stop $(docker ps -a -f "name=mongo" -q))
+#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-dal" -q))
+#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-api" -q))
+#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-router" -q))
 
 # Mongo DB
 docker pull mongo
