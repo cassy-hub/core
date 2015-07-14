@@ -21,7 +21,7 @@ docker run -it --name cassyhub-api -p 1041:1041  --link cassyhub-dal:cassyhub-da
 
 # Cassy Router
 docker build -t cassyhub/router ./router/.
-docker run -it --name cassyhub-router -p 80:80  --link cassyhub-api:cassyhub-api -d cassyhub/router
+docker run -it --name cassyhub-router -p 80:80 --link cassyhub-api:cassyhub-api -d cassyhub/router
 
 
 

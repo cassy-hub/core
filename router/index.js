@@ -12,7 +12,7 @@ app.get('/', function (req, res) {
   res.sendfile('www/index.html');
 });
 
-app.use('/api/', proxy('http://cassyhub-api:1041/', {
+app.use('/api/', proxy('http://cassyhub-api:1041/api/', {
   forwardPath: function(req, res) {
     return require('url').parse(req.url).path;
   }
