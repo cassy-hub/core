@@ -7,11 +7,12 @@ var DemoPage = React.createClass({
     $.ajax({
       url: '/api/page',
       dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
       method: 'post',
       cache: false,
-      data: {
+      data: JSON.stringify({
         hello: "world"
-      },
+      }),
       success: function(data) {
         console.log('success', data);
       }.bind(this),
