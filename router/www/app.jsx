@@ -4,7 +4,18 @@ var DemoPage = React.createClass({
   },
 
   handleClick: function(event) {
-    console.log('hi there');
+    $.ajax({
+      url: '/api/page',
+      dataType: 'json',
+      method: 'post',
+      cache: false,
+      success: function(data) {
+        console.log('success', data);
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
   },
 
   render: function() {
