@@ -5,7 +5,7 @@ echo $DIR/router/
 mongoId=$(docker ps -a -f "status=running" -f "name=cassyhub-" -q)
 
 if [[ "$mongoId" == "" ]] || [[ "$1" == "clear-db" ]]; then
-  ECHO "Clearing everything. Starting from scratch!"
+  echo "Clearing everything. Starting from scratch!"
 
   docker rm $(docker kill $(docker ps -a -f "name=cassyhub-" -q))
 
