@@ -22,7 +22,7 @@ app.get('/api/', function (req, res) {
     assert.equal(null, err);
     insertDocuments(db, function() {
       findDocuments(db, function(result){
-        res.send('Hit me baby ' + result.length + ' time!!');
+        res.send({ times: result.length });
         db.close();
       });
     });
