@@ -6,7 +6,10 @@
   "author": "Daniel Gasienica <daniel@gasienica.ch>",
   "dependencies": {
     "express": "3.2.4",
-    "mongodb": "~2.0"
+    "mongodb": "~2.0",
+    "body-parser": "*",
+    "lodash": "*",
+    "express-stormpath": "*"
   },
   "scripts": {
     "start": "forever -w start index.js"

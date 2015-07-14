@@ -14,7 +14,7 @@ var DemoPage = React.createClass({
 
   componentDidMount: function() {
       $.ajax({
-        url: '/api/',
+        url: '/api',
         dataType: 'json',
         cache: false,
         success: function(data) {
@@ -28,4 +28,4 @@ var DemoPage = React.createClass({
 });
 
 var demoPage = React.createElement(DemoPage);
-React.render(demoPage, document.body);
+React.render(demoPage, document.getElementById('cassy'));
