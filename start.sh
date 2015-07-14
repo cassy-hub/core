@@ -1,9 +1,23 @@
-# Clean up old docker containers
-docker rm $(docker kill $(docker ps -a -f "name=cassyhub-" -q))
+#!/bin/bash
 
-# Mongo DB
-docker pull mongo
-docker run --name cassyhub-db -d mongo
+# Clean up old docker containers
+mongoId=$(docker ps -a -f "name=cassyhub-db" -q)
+
+if [[ "$mongoId" == "" ]] || [[ "$1" == "clear-db" ]]; then
+  ECHO "Clearing everything. Starting from scratch!"
+
+  docker rm $(docker kill $(docker ps -a -f "name=cassyhub-" -q))
+
+  # Mongo DB
+  docker pull mongo
+  docker run --name cassyhub-db -d mongo
+else
+  ECHO "Keeping database. Rebuilding other packages!"
+
+  docker rm $(docker kill $(docker ps -a -f "name=cassyhub-dal" -q))
+  docker rm $(docker kill $(docker ps -a -f "name=cassyhub-api" -q))
+  docker rm $(docker kill $(docker ps -a -f "name=cassyhub-router" -q))
+fi
 
 # Cassy Data Access Layer
 docker build -t cassyhub/dal ./dal/.
