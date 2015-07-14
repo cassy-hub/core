@@ -13,5 +13,5 @@ COPY . /app/
 # Install app dependencies
 RUN cd /app; npm install
 
-EXPOSE  1041
+EXPOSE  80
 CMD cd /app && npm start && bash
