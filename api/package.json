@@ -7,7 +7,8 @@
   "dependencies": {
     "express": "3.2.4",
     "express-http-proxy": "^0.6.0",
-    "mongodb": "~2.0"
+    "mongodb": "~2.0",
+    "request": "^2.58.0"
   },
   "scripts": {
     "start": "forever -w start index.js"
