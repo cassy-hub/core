@@ -3,11 +3,32 @@ var DemoPage = React.createClass({
     return {data: []};
   },
 
+  handleClick: function(event) {
+    $.ajax({
+      url: '/api/page',
+      dataType: 'json',
+      contentType: 'application/json; charset=utf-8',
+      method: 'post',
+      cache: false,
+      data: JSON.stringify({
+        hello: "world"
+      }),
+      success: function(data) {
+        console.log('success', data);
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.error(this.props.url, status, err.toString());
+      }.bind(this)
+    });
+  },
+
   render: function() {
+
     return (
       <div>
         <h3>API Response:</h3>
         <p>This page has been viewed {this.state.data.times} time{this.state.data.times > 1 ? 's' : ''}</p>
+        <button onClick={this.handleClick}>Insert Document</button>
       </div>
     );
   },
@@ -27,5 +48,4 @@ var DemoPage = React.createClass({
     },
 });
 
-var demoPage = React.createElement(DemoPage);
-React.render(demoPage, document.getElementById('cassy'));
+React.render(<DemoPage />, document.body);
