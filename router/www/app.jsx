@@ -3,11 +3,17 @@ var DemoPage = React.createClass({
     return {data: []};
   },
 
+  handleClick: function(event) {
+    console.log('hi there');
+  },
+
   render: function() {
+
     return (
       <div>
         <h3>API Response:</h3>
         <p>This page has been viewed {this.state.data.times} time{this.state.data.times > 1 ? 's' : ''}</p>
+        <button onClick={this.handleClick}>Insert Document</button>
       </div>
     );
   },
