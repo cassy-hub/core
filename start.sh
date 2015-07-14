@@ -1,5 +1,5 @@
 # Clean up old docker containers
-docker rm $(docker stop $(docker ps -a -f "name=cassyhub-" -q))
+docker rm $(docker kill $(docker ps -a -f "name=cassyhub-" -q))
 
 # Mongo DB
 docker pull mongo
