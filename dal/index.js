@@ -11,7 +11,7 @@ var app = express();
 app.get('/data/', function (req, res) {
 
 // Connection URL
-  var url = 'mongodb://mongo:27017/cassy';
+  var url = 'mongodb://cassyhub-db:27017/cassy';
 // Use connect method to connect to the Server
   MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
