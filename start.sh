@@ -13,7 +13,7 @@ if [[ "$mongoId" == "" ]] || [[ "$1" == "clear-db" ]]; then
   docker pull mongo
   docker run --name cassyhub-db -d mongo
 else
-  ECHO "Keeping database. Rebuilding other packages!"
+  echo "Keeping database. Rebuilding other packages!"
 
   docker rm $(docker kill $(docker ps -a -f "name=cassyhub-dal" -q))
   docker rm $(docker kill $(docker ps -a -f "name=cassyhub-api" -q))
