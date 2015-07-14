@@ -9,19 +9,19 @@ docker rm $(docker stop $(docker ps -a -q))
 
 # Mongo DB
 docker pull mongo
-docker run --name cassyhub-db -d mongo # -p 27017:27017
+docker run -it --name cassyhub-db -d mongo # -p 27017:27017
 
 # Cassy Data Access Layer
 docker build -t cassyhub/dal ./dal/.
-docker run --name cassyhub-dal -p 1040:1040 -d cassyhub/dal
+docker run -it --name cassyhub-dal -p 1040:1040 -d cassyhub/dal
 
 # Cassy API
 docker build -t cassyhub/api ./api/.
-docker run --name cassyhub-api -p 1041:1041 -d cassyhub/api
+docker run -it --name cassyhub-api -p 1041:1041 -d cassyhub/api
 
 # Cassy Router
 docker build -t cassyhub/router ./router/.
-docker run --name cassyhub-router -p 80:80 -d cassyhub/router
+docker run -it --name cassyhub-router -p 80:80 -d cassyhub/router
 
 
 
