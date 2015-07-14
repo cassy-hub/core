@@ -4,7 +4,7 @@ var express = require('express');
 var request = require('request');
 
 // Constants
-var PORT = 1041;
+var PORT = 80;
 
 // App
 var app = express();
@@ -16,7 +16,7 @@ app.get('/test/', function (req, res) {
 
 app.get('/', function (req, res) {
 
-  request('http://cassyhub-dal:1040/data/', function(error, response, body) {
+  request('http://cassyhub-dal/data/', function(error, response, body) {
     res.send(body);
   });
 

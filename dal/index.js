@@ -3,7 +3,7 @@ var assert = require('assert');
 var express = require('express');
 
 // Constants
-var PORT = 1040;
+var PORT = 80;
 
 // App
 var app = express();
