@@ -2,9 +2,10 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Install node modules locally
-cd $DIR/api/ && npm install && cd $DIR
-cd $DIR/dal/ && npm install && cd $DIR
-cd $DIR/router/ && npm install && cd $DIR
+cd $DIR/api/ && npm install
+cd $DIR/dal/ && npm install
+cd $DIR/router/ && npm install
+cd $DIR
 
 # Clean up old docker containers
 mongoId=$(docker ps -a -f "status=running" -f "name=cassyhub-" -q)
