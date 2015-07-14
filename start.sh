@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Clean up old docker containers
-mongoId=$(docker ps -a -f "name=cassyhub-db" -q)
+mongoId=$(docker ps -a -f "status=running" -f "name=cassyhub-" -q)
 
 if [[ "$mongoId" == "" ]] || [[ "$1" == "clear-db" ]]; then
   ECHO "Clearing everything. Starting from scratch!"
