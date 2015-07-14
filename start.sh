@@ -1,11 +1,7 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 # Clean up old docker containers
-docker rm $(docker stop $(docker ps -a -q))
-#docker rm $(docker stop $(docker ps -a -f "name=mongo" -q))
-#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-dal" -q))
-#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-api" -q))
-#docker rm $(docker stop $(docker ps -a -f "name=cassyhub-router" -q))
+docker rm $(docker stop $(docker ps -a -f "name=cassyhub-" -q))
 
 # Mongo DB
 docker pull mongo
@@ -22,9 +18,3 @@ docker run -it --name cassyhub-api --link cassyhub-dal:cassyhub-dal -d cassyhub/
 # Cassy Router
 docker build -t cassyhub/router ./router/.
 docker run -it --name cassyhub-router -p 80:80 --link cassyhub-api:cassyhub-api -d cassyhub/router
-
-
-
-
-
-#§docker run --name cassyhub-core -it -p 8080:8080 -v $DIR/src:/app/src -d cassyhub/core
