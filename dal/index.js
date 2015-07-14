@@ -1,53 +1,79 @@
-var MongoClient = require('mongodb').MongoClient;
-var assert = require('assert');
+var mongodb = require('mongodb');
+var MongoClient = mongodb.MongoClient;
 var express = require('express');
+var bluebird = require('bluebird');
+bluebird.promisifyAll(mongodb);
+var bodyParser = require('body-parser');
 
 // Constants
 var PORT = 80;
+var dbURL = 'mongodb://cassyhub-db:27017/cassy';
 
 // App
 var app = express();
+app.use(bodyParser.json());
 
-app.get('/data/', function (req, res) {
-
-// Connection URL
-  var url = 'mongodb://cassyhub-db:27017/cassy';
-// Use connect method to connect to the Server
-  MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
-    insertDocuments(db, function() {
-      findDocuments(db, function(result){
-        res.send({ times: result.length });
-        db.close();
-      });
-    });
-  });
+//List all?
+app.get('/:collectionName', function (req, res) {	
+	getDB()
+		.then(function(db){
+			return db.collection(req.params.collectionName).find().toArray();
+		})
+		.then(function(docs) {
+			res.send(docs);
+		})
+		.catch(function(err){
+			res.send(false);
+		});
+});
+//Read by ID
+app.get('/:collectionName/:id', function (req, res) {
+	getDB()
+		.then(function(db){
+			return db.collection(req.params.collectionName).find(req.params.id).toArray();
+		})
+		.then(function(docs) {
+			res.send(docs);
+		})
+		.catch(function(err){
+			res.send(false);
+		});
+});
+//Create
+app.post('/:collectionName', function (req, res) {
+	getDB()
+		.then(function(db){
+			return db.collection(req.params.collectionName).insert(res.body)
+		})
+		.then(function(result) {
+			res.send(result);
+		})
+		.catch(function(err){
+			res.send(false);
+		});
+});
+//Update
+app.patch('/:collectionName/:id', function (req, res) {
 
 });
+//Delete
+app.delete('/:collectionName/:id', function (req, res) {
+	
+});
 
-var findDocuments = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Find some documents
-  collection.find({}).toArray(function(err, docs) {
-    assert.equal(err, null);
-    console.log("Found the following records");
-    console.dir(docs);
-    callback(docs);
-  });
-};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-var insertDocuments = function(db, callback) {
-  // Get the documents collection
-  var collection = db.collection('documents');
-  // Insert some documents
-  collection.insert([
-    {a : 1}
-  ], function(err, result) {
-    assert.equal(err, null);
-    callback(result);
-  });
+var getDB = function() {
+	var deferred = bluebird.defer();
+	MongoClient.connect(dbURL, function(err, db) {
+		if(err){
+			deferred.reject(err);
+		}else{
+			deferred.resolve(db);
+		}
+	});
+	return deferred.promise;
 };
 
 app.listen(PORT);
-console.log('Running on http://localhost:' + PORT);
+console.log('cassy-hub/dal running on http://localhost:' + PORT);

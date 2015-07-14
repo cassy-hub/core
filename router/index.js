@@ -9,14 +9,14 @@ var app = express();
 app.use(express.static('www'));
 
 app.get('/', function (req, res) {
-  res.sendfile('www/index.html');
+	res.sendfile('www/index.html');
 });
 
-app.use('/api/', proxy('cassyhub-api', {
-  forwardPath: function(req, res) {
-    return require('url').parse(req.url).path;
-  }
+app.use('/api', proxy('cassyhub-api', {
+	forwardPath: function(req, res) {
+		return require('url').parse(req.url).path;
+	}
 }));
 
 app.listen(PORT);
-console.log('Running on http://localhost:' + PORT);
+console.log('cassy-hub/router running on http://localhost:' + PORT);

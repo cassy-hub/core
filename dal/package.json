@@ -7,7 +7,10 @@
   "dependencies": {
     "express": "3.2.4",
     "express-http-proxy": "^0.6.0",
-    "mongodb": "~2.0"
+    "mongodb": "~2.0",
+    "q": "~1.4.1",
+    "bluebird": "~2.9.33",
+    "body-parser": "~1.13.2"
   },
   "scripts": {
     "start": "forever -w start index.js"
