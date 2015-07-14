@@ -14,7 +14,7 @@ app.get('/test/', function (req, res) {
   res.send('hi');
 });
 
-app.get('/api/', function (req, res) {
+app.get('/', function (req, res) {
 
   request('http://cassyhub-dal:1040/data/', function(error, response, body) {
     res.send(body);
