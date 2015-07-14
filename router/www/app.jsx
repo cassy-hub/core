@@ -27,5 +27,4 @@ var DemoPage = React.createClass({
     },
 });
 
-var demoPage = React.createElement(DemoPage);
-React.render(demoPage, document.body);
+React.render(<DemoPage />, document.body);

@@ -3,17 +3,12 @@ var assert = require('assert');
 var express = require('express');
 
 // Constants
-var PORT = 8080;
+var PORT = 1040;
 
 // App
 var app = express();
-app.use(express.static('www'));
 
-app.get('/', function (req, res) {
-  res.sendfile('www/index.html');
-});
-
-app.get('/api/', function (req, res) {
+app.get('/data/', function (req, res) {
 
 // Connection URL
   var url = 'mongodb://localhost:27017/cassy';
