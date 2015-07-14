@@ -1,5 +1,3 @@
-DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-
 # Clean up old docker containers
 docker rm $(docker stop $(docker ps -a -f "name=cassyhub-" -q))
 
