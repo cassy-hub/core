@@ -1,6 +1,11 @@
 #!/bin/bash
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-echo $DIR/router/
+
+# Install node modules locally
+npm install ./api/
+npm install ./dal/
+npm install ./router/
+
 # Clean up old docker containers
 mongoId=$(docker ps -a -f "status=running" -f "name=cassyhub-" -q)
 
