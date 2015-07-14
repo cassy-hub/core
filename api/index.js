@@ -10,9 +10,13 @@ var PORT = 1041;
 var app = express();
 app.use(express.static('www'));
 
+app.get('/test/', function (req, res) {
+  res.send('hi');
+});
+
 app.get('/api/', function (req, res) {
 
-  request('http://localhost:1040/data/', function(error, response, body) {
+  request('http://cassyhub-dal:1040/data/', function(error, response, body) {
     res.send(body);
   });
 

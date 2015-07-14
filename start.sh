@@ -13,15 +13,15 @@ docker run --name cassyhub-db -d mongo
 
 # Cassy Data Access Layer
 docker build -t cassyhub/dal ./dal/.
-docker run -it --name cassyhub-dal -p 1040:1040  --link cassyhub-db:mongo -d cassyhub/dal
+docker run -it --name cassyhub-dal -p 1040:1040 --link cassyhub-db:cassyhub-db -d cassyhub/dal
 
 # Cassy API
 docker build -t cassyhub/api ./api/.
-docker run -it --name cassyhub-api -p 1041:1041 -d cassyhub/api
+docker run -it --name cassyhub-api -p 1041:1041  --link cassyhub-dal:cassyhub-dal -d cassyhub/api
 
 # Cassy Router
 docker build -t cassyhub/router ./router/.
-docker run -it --name cassyhub-router -p 80:80 -d cassyhub/router
+docker run -it --name cassyhub-router -p 80:80  --link cassyhub-api:cassyhub-api -d cassyhub/router
 
 
 
