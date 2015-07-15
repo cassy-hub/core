@@ -9,6 +9,7 @@
     "mongodb": "~2.0",
     "body-parser": "*",
     "lodash": "*",
+    "request": "*",
     "express-stormpath": "~1.0.5",
     "express-http-proxy": "^0.6.0"
   },

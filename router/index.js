@@ -1,6 +1,9 @@
 var express = require('express');
-var proxy = require('express-http-proxy');
+//var proxy = require('express-http-proxy');
 var stormpath = require('express-stormpath');
+var request = require('request');
+var _ = require('lodash');
+var fs = require('fs');
 
 // Constants
 var PORT = 80;
@@ -20,11 +23,39 @@ app.get('/', stormpath.loginRequired, function (req, res) {
   res.sendfile('www/index.html');
 });
 
-app.use('/api', stormpath.loginRequired, proxy('cassyhub-api', {
-	forwardPath: function(req, res) {
-		return require('url').parse(req.url).path;
-	}
-}));
+app.get(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
+app.post(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
+app.put(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
+app.delete(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
+
+function proxy (req, res) {
+  console.log(req.url.substring(4));
+  var url = "http://cassyhub-api:80" + req.url.substring(4);
+  console.log("Forwarding to " + url);
+
+  var options = {
+    url: url,
+    method: req.method,
+    headers: req.headers
+  };
+
+  if (req.files && !_.isEqual(req.files, {})) {
+    options.formData = {};
+    options.headers = {};
+    var files = _.each(req.files, function(file, i) { options.formData["file" + i] = fs.createReadStream(file.path)});
+  }
+
+  if (req.body && !_.isEqual(req.body, {})) {
+    console.log("Body: ", req.body)
+    var out = request(options);
+    out.pipe(res);
+    out.write(JSON.stringify(req.body));
+    out.end();
+  } else {
+    console.log("Empty Body")
+    request(options).pipe(res);
+  }
+}
 
 app.listen(PORT);
 console.log('cassy-hub/router running on http://localhost:' + PORT);

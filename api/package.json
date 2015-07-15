@@ -9,7 +9,8 @@
     "express-http-proxy": "~0.6.0",
     "mongodb": "~2.0",
     "request": "^2.58.0",
-    "body-parser": "~1.13.2"
+    "body-parser": "~1.13.2",
+    "lodash": "*"
   },
   "scripts": {
     "start": "forever -w start index.js"
