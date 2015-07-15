@@ -1,8 +1,7 @@
 var mongodb = require('mongodb');
 var MongoClient = mongodb.MongoClient;
 var express = require('express');
-var bluebird = require('bluebird');
-bluebird.promisifyAll(mongodb);
+var q = require('q');
 var bodyParser = require('body-parser');
 
 // Constants
@@ -16,6 +15,7 @@ app.use(bodyParser.json());
 
 app.post('/:collectionName', function (req, res) {
 	console.log("DAL request received for POST '/:collectionName': "+req.path);
+	console.log("DAL request body: ",req.body);
 	var database;
 	getDB()
 		.then(function(db){
@@ -40,9 +40,11 @@ app.post('/:collectionName', function (req, res) {
 			}
 		})
 		.then(function(result) {
+			console.log("DAL result:", result);
 			res.send(result);
 		})
 		.catch(function(err){
+			console.log("DAL error: ", err);
 			res.send(false);
 		})
 		.finally(function(){
@@ -51,21 +53,45 @@ app.post('/:collectionName', function (req, res) {
 });
 
 var findDocuments = function(db, collectionName, match) {
-	return db.collection(collectionName).find(match).toArray();
+	var deferred = q.defer();
+	db.collection(collectionName).find(match).toArray(function(err, result){
+		if(err){
+			deferred.reject(err);
+		}else{
+			deferred.resolve(result);
+		}
+	});
+	return deferred.promise;
 };
 
 var upsertDocuments = function(db, collectionName, match, doc) {
-  return db.collection(collectionName).update(match, {$set: doc}, {upsert: true});
+  var deferred = q.defer();
+	db.collection(collectionName).update(match, {$set: doc}, {upsert: true}, function(err, result){
+		if(err){
+			deferred.reject(err);
+		}else{
+			deferred.resolve(result);
+		}
+	});
+	return deferred.promise
 };
 
 var unsetDocuments = function(db, collectionName, match, path) {
-  var doc = {};
+  var deferred = q.defer();
+	var doc = {};
   doc[path] = "";
-  return db.collection(collectionName).update(match, {$unset: doc});
+  db.collection(collectionName).update(match, {$unset: doc},function(err, result){
+		if(err){
+			deferred.reject(err);
+		}else{
+			deferred.resolve(result);
+		}
+	});
+	return deferred.promise;
 };
 
 var getDB = function() {
-	var deferred = bluebird.defer();
+	var deferred = q.defer();
 	MongoClient.connect(dbURL, function(err, db) {
 		if(err){
 			deferred.reject(err);

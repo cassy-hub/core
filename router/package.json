@@ -9,10 +9,11 @@
     "bower": "^1.4.1",
     "express": "3.2.4",
     "express-http-proxy": "^0.6.0",
-    "express-stormpath": "~1.0.5",
-    "lodash": "*",
+    "jquery": "^2.1.4",
+    "lodash": "^3.10.0",
     "mongodb": "~2.0",
-    "request": "*"
+    "request": "*",
+    "express-stormpath": "~1.0.5"
   },
   "scripts": {
     "start": "forever start index.js"
