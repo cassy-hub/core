@@ -14,7 +14,7 @@ var PORT = 8080;
 var app = express();
 app.use(express.static('www'));
 app.use(bodyParser.json());
-
+/*
 app.use(stormpath.init(app, {
   apiKeyId: '4I5B71C5G3FZOLO7RYJVMAWAT',
   apiKeySecret: 'KyTW5BNTFASZf792fGHUKyTG7vMJI16fhpFXK67sE8A',
@@ -25,7 +25,7 @@ app.use(stormpath.init(app, {
 app.get('/i', stormpath.loginRequired, function (req, res) {
   res.sendfile('www/index.html');
 });
-
+*/
 app.get(/^\/api\/(.*)/, stormpath.loginRequired, function (req, res) {
 
 // Connection URL
