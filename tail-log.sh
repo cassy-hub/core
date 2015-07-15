@@ -27,7 +27,7 @@ if [[ "$containerID" != "" ]]; then
 	echo ""
 	echo ""
 	docker exec $containerID tail -f $logfile
-	
+
 else
 	echo "ERROR: Could not find container with name: '"$containerName"'"
 fi
