@@ -11,28 +11,42 @@ define(function(require) {
       var NavItem = ReactBootstrap.NavItem;
       var DropdownButton = ReactBootstrap.DropdownButton;
       var MenuItem = ReactBootstrap.MenuItem;
+      var user = this.props.user
 
-      return (
-        <Navbar brand='Cassy Hub'>
-          <Nav>
-            <NavItem eventKey={1} href='#'>Home</NavItem>
-            <DropdownButton eventKey={3} title='Content'>
-              <MenuItem eventKey='4'>Create new document</MenuItem>
-              <MenuItem divider />
-              <MenuItem eventKey='1'>Document 1</MenuItem>
-              <MenuItem eventKey='2'>Document 2</MenuItem>
-              <MenuItem eventKey='3'>Document 3</MenuItem>
-            </DropdownButton>
-            <DropdownButton eventKey={4} title='Account'>
-              <MenuItem eventKey='1'>Settings</MenuItem>
-              <MenuItem eventKey='2'>Change Password</MenuItem>
-              <MenuItem divider />
-              <MenuItem eventKey='3'>Logout</MenuItem>
-            </DropdownButton>
-            <NavItem eventKey={1} href='#'>Help</NavItem>
-          </Nav>
-        </Navbar>
-      );
+      if (user) {
+        return (
+          <Navbar brand='Cassy Hub'>
+            <Nav>
+              <NavItem eventKey={1} href='#'>Home</NavItem>
+              <DropdownButton eventKey={3} title='Content'>
+                <MenuItem eventKey='4'>Create new document</MenuItem>
+                <MenuItem divider />
+                <MenuItem eventKey='1'>Document 1</MenuItem>
+                <MenuItem eventKey='2'>Document 2</MenuItem>
+                <MenuItem eventKey='3'>Document 3</MenuItem>
+              </DropdownButton>
+              <DropdownButton eventKey={4} title='Account'>
+                <MenuItem eventKey='1'>Settings</MenuItem>
+                <MenuItem eventKey='2'>Change Password</MenuItem>
+                <MenuItem divider />
+                <MenuItem eventKey='3' href='/logout'>Logout</MenuItem>
+              </DropdownButton>
+              <NavItem eventKey={1} href='#'>Help</NavItem>
+            </Nav>
+          </Navbar>
+        );
+      } else {
+        return (
+          <Navbar brand='Cassy Hub'>
+            <Nav>
+              <NavItem eventKey={1} href='/'>Home</NavItem>
+              <NavItem eventKey={1} href='/login'>Login</NavItem>
+              <NavItem eventKey={1} href='/register'>Register</NavItem>
+              <NavItem eventKey={1} href='/help'>Help</NavItem>
+            </Nav>
+          </Navbar>
+        );
+      }
     }
 
   });

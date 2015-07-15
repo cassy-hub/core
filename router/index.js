@@ -20,11 +20,16 @@ app.use(stormpath.init(app, {
   apiKeySecret: 'KyTW5BNTFASZf792fGHUKyTG7vMJI16fhpFXK67sE8A',
   application: 'https://api.stormpath.com/v1/applications/4nNuaKjuY29IG8HhvcC0QG',
   secretKey: 'some_long_random_string',
-  redirectUrl: '/dashboard'
+  enableForgotPassword: true
 }));
 
-app.get('/dashboard', stormpath.loginRequired, function (req, res) {
-  res.sendfile('views/index-member.html');
+app.get('/get-user', function (req, res) {
+  res.send(req.user ? req.user : "false");
+});
+
+
+app.get('/*', function (req, res) {
+  res.sendfile('public/index.html');
 });
 
 app.get(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
