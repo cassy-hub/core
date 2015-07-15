@@ -43,7 +43,7 @@ define(function(require) {
 
     componentDidMount: function() {
         $.ajax({
-          url: '/api',
+          url: '/api/_test',
           dataType: 'json',
           cache: false,
           success: function(data) {
