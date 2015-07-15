@@ -4,7 +4,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 # Install node modules locally
 cd $DIR/api/ && npm install
 cd $DIR/dal/ && npm install
-cd $DIR/router/ && npm install
+cd $DIR/router/ && npm install && ./node_modules/.bin/bower install
 cd $DIR
 
 # Clean up old docker containers
