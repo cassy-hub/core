@@ -7,11 +7,19 @@ require.config({
     "text": "assets/js/text",
     "react-bootstrap": "vendor/react-bootstrap/dist/react-bootstrap",
     "jquery": "vendor/jquery/dist/jquery",
+    "react-router": "vendor/react-router/umd/ReactRouter",
     "lodash": "vendor/lodash/index"
   },
 
   jsx: {
     fileExtension: '.jsx'
+  },
+
+  shim: {
+    "react-router": {
+      exports: "ReactRouter",
+      deps: ['react']
+    }
   }
 
 });

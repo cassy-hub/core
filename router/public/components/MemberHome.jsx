@@ -6,7 +6,7 @@ define(function(require) {
   var HeaderBar = require('jsx!components/globals/HeaderBar');
   var FooterBar = require('jsx!components/globals/FooterBar');
 
-  var HomePage = React.createClass({
+  var MemberHome = React.createClass({
     getInitialState: function() {
       return {data: []};
     },
@@ -19,8 +19,9 @@ define(function(require) {
         <div>
           <HeaderBar user={user}/>
           <div>
-            <h3>Welcome to <strong>Cassy Hub</strong></h3>
-            <p>Create an account to access the goodness</p>
+            <h3>Hello <strong>{user.fullname}</strong></h3>
+            <p>This page has been viewed {this.state.data.times} time{this.state.data.times > 1 ? 's' : ''}</p>
+            <Button bsStyle="success" onClick={this.handleClick}>Insert Document</Button>
           </div>
           <FooterBar />
         </div>
@@ -29,5 +30,5 @@ define(function(require) {
 
   });
 
-  return HomePage;
+  return MemberHome;
 });
