@@ -25,12 +25,18 @@ app.use(stormpath.init(app, {
 }));
 
 app.get('/get-user', function (req, res) {
-  res.send(req.user ? req.user : "false");
+  res.send(req.user ? {
+    'username': req.user.username,
+    'givenName': req.user.givenName,
+    'middleName': req.user.middleName,
+    'surname': req.user.surname,
+    'fullName': req.user.fullName,
+  }: 'false');
 });
 
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
-  var url = "http://cassyhub-api:80" + req.url.substring(4);
-  console.log("Router proxy forwarding to " + url);
+  var url = 'http://cassyhub-api:80' + req.url.substring(4);
+  console.log('Router proxy forwarding to ' + url);
 
   var userID = req.user.href.split('/').pop();
   var options = {
@@ -44,23 +50,24 @@ app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
   if (req.files && !_.isEqual(req.files, {})) {
     options.formData = {};
     options.headers = {};
-    var files = _.each(req.files, function(file, i) { options.formData["file" + i] = fs.createReadStream(file.path)});
+     _.each(req.files, function(file, i) {
+      options.formData['file' + i] = fs.createReadStream(file.path);
+    });
   }
 
   if (req.body && !_.isEqual(req.body, {})) {
     options.body = req.body;
     options.json = true;
   }
-  request(options, function(error, result, body) {
+  request(options, function(error, result) {
     if(error) {
-      console.log("Router proxy error: ", error);
-      res.send("error from router -> api");
+      console.log('Router proxy error: ', error);
+      res.send('error from router -> api');
     } else {
       res.send(result.body);
     }
   });
 });
-
 
 app.get('/*', function (req, res) {
   res.sendfile('public/index.html');
