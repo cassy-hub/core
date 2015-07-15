@@ -7,6 +7,7 @@ var PORT = 80;
 // App
 var app = express();
 app.use(express.static('www'));
+app.use('/vendor', express.static('node_modules'));
 
 app.get('/', function (req, res) {
 	res.sendfile('www/index.html');
