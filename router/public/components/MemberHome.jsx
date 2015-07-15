@@ -19,8 +19,8 @@ define(function(require) {
         <div>
           <HeaderBar user={user}/>
           <div>
-            <h3>Hello <strong>{user.fullname}</strong></h3>
-            <p>This page has been viewed {this.state.data.times} time{this.state.data.times > 1 ? 's' : ''}</p>
+            <h3>Hello <strong>{user.fullName}</strong></h3>
+            <p>Let it be said that the {user.givenName} the great has done it again!</p>
             <Button bsStyle="success" onClick={this.handleClick}>Insert Document</Button>
           </div>
           <FooterBar />
