@@ -1,6 +1,7 @@
 var express = require('express');
 //var proxy = require('express-http-proxy');
 var stormpath = require('express-stormpath');
+var bodyParser = require('body-parser');
 var request = require('request');
 var _ = require('lodash');
 var fs = require('fs');
@@ -10,6 +11,7 @@ var PORT = 80;
 
 // App
 var app = express();
+app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use(express.static('public'));
 

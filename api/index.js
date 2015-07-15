@@ -16,6 +16,7 @@ app.get('/_test', function (req, res) {
 });
 
 app.get(/^\/documents\/(.*)/, function (req, res) {
+
   var payload = {
     op: 'find',
     match: {
