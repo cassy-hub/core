@@ -16,21 +16,23 @@ app.get('/_test', function (req, res) {
 });
 
 app.get(/^\/documents\/(.*)/, function (req, res) {
-
+  console.log('API GET /documents');
   var payload = {
     op: 'find',
     match: {
       'userid': 123
     }
   }
-	request.get('http://cassyhub-dal:80', payload, function(error, result, body) {
+  request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
-      res.send("error");
+      res.send("error from api -> dal");
       return;
     }
+    console.log("API GET result: ", result);
     var params = req.params[0].split('/').join(".");
     var content;
+    result = result.body;
     if (!_.get(result[0], params)) {
       content = "Tag not found"
     } else if (_.get(result[0], params).content) {
@@ -43,6 +45,7 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
 });
 
 app.post('/documents', function (req, res) {
+  console.log('API POST /documents');
   var tag = req.body.tags.split("/").join(".");
   var update = {};
   update[tag + ".content"] = req.body.content;
@@ -53,18 +56,19 @@ app.post('/documents', function (req, res) {
      },
      doc: update
    };
-  request.post('http://cassyhub-dal:80/documents', payload, function(error, result, body) {
+  request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
-      res.send("error");
+      res.send("error from api -> dal");
       return;
     }
-		res.send(response.body);
+		res.send(result.body);
 	});
 });
 
 
 app.delete('/documents', function (req, res) {
+  console.log('API DELETE /documents');
   var tag = req.body.tags.split("/").join(".");
   var payload = {
     op: 'unset',
@@ -73,13 +77,13 @@ app.delete('/documents', function (req, res) {
      },
      path: tag
    };
-  request.post('http://cassyhub-dal:80/documents', payload, function(error, result, body) {
+  request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
-      res.send("error");
+      res.send("error from api -> dal");
       return;
     }
-		res.send(response.body);
+		res.send(result.body);
 	});
 });
 

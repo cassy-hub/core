@@ -33,15 +33,17 @@ app.put(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
 app.delete(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
 
 function proxy (req, res) {
+  console.log("--------------------------------------------")
   console.log(req.url.substring(4));
   var url = "http://cassyhub-api:80" + req.url.substring(4);
   console.log("Forwarding to " + url);
 
   var options = {
     url: url,
-    method: req.method,
-    headers: req.headers
+    method: req.method//,
+    //headers: req.headers
   };
+  console.log("options: ", options);
 
   if (req.files && !_.isEqual(req.files, {})) {
     options.formData = {};
@@ -50,11 +52,26 @@ function proxy (req, res) {
   }
 
   if (req.body && !_.isEqual(req.body, {})) {
-    console.log("Body: ", req.body)
+    console.log("Body: ", req.body);
+    options.body = req.body;
+    options.json = true;
+    request(options, function(error, result, body) {
+      if(error){
+        console.log(error);
+        res.send("error from router -> api");
+
+      }else {
+        res.send(result);
+      }
+
+    });
+
+    /*
     var out = request(options);
     out.pipe(res);
     out.write(JSON.stringify(req.body));
     out.end();
+    */
   } else {
     console.log("Empty Body")
     request(options).pipe(res);
