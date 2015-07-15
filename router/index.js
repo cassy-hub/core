@@ -27,28 +27,14 @@ app.get('/get-user', function (req, res) {
   res.send(req.user ? req.user : "false");
 });
 
-
-app.get('/*', function (req, res) {
-  res.sendfile('public/index.html');
-});
-
-app.get(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.post(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.put(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.delete(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-
-function proxy (req, res) {
-  console.log("--------------------------------------------")
-  console.log(req.url.substring(4));
+app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
   var url = "http://cassyhub-api:80" + req.url.substring(4);
-  console.log("Forwarding to " + url);
+  console.log("Router proxy forwarding to " + url);
 
   var options = {
     url: url,
-    method: req.method//,
-    //headers: req.headers
+    method: req.method
   };
-  console.log("options: ", options);
 
   if (req.files && !_.isEqual(req.files, {})) {
     options.formData = {};
@@ -57,31 +43,23 @@ function proxy (req, res) {
   }
 
   if (req.body && !_.isEqual(req.body, {})) {
-    console.log("Body: ", req.body);
     options.body = req.body;
     options.json = true;
-    request(options, function(error, result, body) {
-      if(error){
-        console.log(error);
-        res.send("error from router -> api");
-
-      }else {
-        res.send(result);
-      }
-
-    });
-
-    /*
-    var out = request(options);
-    out.pipe(res);
-    out.write(JSON.stringify(req.body));
-    out.end();
-    */
-  } else {
-    console.log("Empty Body")
-    request(options).pipe(res);
   }
-}
+  request(options, function(error, result, body) {
+    if(error) {
+      console.log("Router proxy error: ", error);
+      res.send("error from router -> api");
+    } else {
+      res.send(result.body);
+    }
+  });
+});
+
+
+app.get('/*', function (req, res) {
+  res.sendfile('public/index.html');
+});
 
 app.listen(PORT);
 console.log('cassy-hub/router running on http://localhost:' + PORT);
