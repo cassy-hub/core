@@ -1,6 +1,7 @@
 define(function(require) {
 
   var React = require('react');
+  var ReactQuill = require('react-quill');
   var ReactBootstrap = require('react-bootstrap');
 
   var HeaderBar = require('jsx!components/globals/HeaderBar');
@@ -21,6 +22,7 @@ define(function(require) {
           <div>
             <h3>Hello <strong>{user.fullName}</strong></h3>
             <p>Let it be said that the {user.givenName} the great has done it again!</p>
+            <ReactQuill value={this.state.value} />
             <Button bsStyle="success" onClick={this.handleClick}>Insert Document</Button>
           </div>
           <FooterBar />

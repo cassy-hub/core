@@ -13,6 +13,7 @@ var PORT = 80;
 var app = express();
 app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
+app.use('/vendor', express.static('bower_components'));
 app.use(express.static('public'));
 
 app.use(stormpath.init(app, {

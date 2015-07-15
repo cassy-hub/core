@@ -6,22 +6,13 @@
   "author": [],
   "dependencies": {
     "body-parser": "*",
-    "bootstrap": "^3.3.5",
+    "bower": "^1.4.1",
     "express": "3.2.4",
     "express-http-proxy": "^0.6.0",
-    "express-stormpath": "*",
-    "jquery": "^2.1.4",
-    "lodash": "^3.10.0",
-    "mongodb": "~2.0",
-    "body-parser": "*",
-    "lodash": "*",
-    "request": "*",
     "express-stormpath": "~1.0.5",
-    "express-http-proxy": "^0.6.0",
-    "react": "^0.13.3",
-    "react-bootstrap": "^0.23.7",
-    "react-router": "^0.13.3",
-    "requirejs": "^2.1.19"
+    "lodash": "*",
+    "mongodb": "~2.0",
+    "request": "*"
   },
   "scripts": {
     "start": "forever start index.js"
