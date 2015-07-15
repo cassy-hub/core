@@ -3,7 +3,7 @@ var request = require('request');
 var proxy = require('express-http-proxy');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
-var deleteKey = require('key-del');
+var shortenKey = require('./key-shorten');
 
 // Constants
 var PORT = 80;
@@ -16,7 +16,7 @@ app.get('/_test', function (req, res) {
   res.send('Hi! The time is: ' + new Date().toString());
 });
 
-app.get('/documents', function (req, res) {
+app.get(/^\/tree\/(.*)/, function (req, res) {
   console.log('API GET /documents');
   var payload = {
     op: 'find',
@@ -30,9 +30,13 @@ app.get('/documents', function (req, res) {
       res.send("error from api -> dal");
       return;
     }
-    console.log("API GET result: ", result);
-    result = result.body;
-    result = deleteKey(_.chain(result[0]).omit('userid').omit('_id').value(), "content");
+    var params = req.params[0].split('/').join(".");
+    result = result.body[0];
+    if (params){
+      result = _.get(result, params);
+    }
+
+    result = shortenKey(_.chain(result).omit('userid').omit('_id').value(), "content");
     res.send(result);
   });
 });
@@ -60,7 +64,7 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
     } else if (_.get(result[0], params).content) {
       content = _.get(result[0], params).content
     } else {
-      content = _.get(result[0], params)
+      content = "No content found for tag"
     }
     res.send(content);
 	});
