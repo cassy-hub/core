@@ -2,6 +2,7 @@ var express = require('express');
 var request = require('request');
 var proxy = require('express-http-proxy');
 var bodyParser = require('body-parser');
+var _ = require('lodash');
 
 // Constants
 var PORT = 80;
@@ -15,6 +16,7 @@ app.get('/_test', function (req, res) {
 });
 
 app.get(/^\/documents\/(.*)/, function (req, res) {
+
   var payload = {
     op: 'find',
     match: {
