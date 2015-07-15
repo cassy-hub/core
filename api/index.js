@@ -3,6 +3,7 @@ var request = require('request');
 var proxy = require('express-http-proxy');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
+var deleteKey = require('key-del');
 
 // Constants
 var PORT = 80;
@@ -13,6 +14,27 @@ app.use(bodyParser.json());
 
 app.get('/_test', function (req, res) {
   res.send('Hi! The time is: ' + new Date().toString());
+});
+
+app.get('/documents', function (req, res) {
+  console.log('API GET /documents');
+  var payload = {
+    op: 'find',
+    match: {
+      'userid': req.headers.userid
+    }
+  }
+  request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
+    if(error){
+      console.log(error);
+      res.send("error from api -> dal");
+      return;
+    }
+    console.log("API GET result: ", result);
+    result = result.body;
+    result = deleteKey(_.chain(result[0]).omit('userid').omit('_id').value(), "content");
+    res.send(result);
+  });
 });
 
 app.get(/^\/documents\/(.*)/, function (req, res) {
