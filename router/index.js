@@ -25,7 +25,13 @@ app.use(stormpath.init(app, {
 }));
 
 app.get('/get-user', function (req, res) {
-  res.send(req.user ? req.user : 'false');
+  res.send(req.user ? {
+    'username': req.user.username,
+    'givenName': req.user.givenName,
+    'middleName': req.user.middleName,
+    'surname': req.user.surname,
+    'fullName': req.user.fullName,
+  }: 'false');
 });
 
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {

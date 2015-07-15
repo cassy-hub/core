@@ -21,6 +21,7 @@
     "jsx-requirejs-plugin": "~0.6.2",
     "requirejs": "~2.1.19",
     "react": "~0.13.3",
-    "bootstrap": "~3.3.5"
+    "bootstrap": "~3.3.5",
+    "quill": "~0.19.14"
   }
 }
