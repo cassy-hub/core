@@ -9,9 +9,8 @@
     "mongodb": "~2.0",
     "body-parser": "*",
     "lodash": "*",
-    "express-stormpath": "*",
-    "express-http-proxy": "^0.6.0",
-    "mongodb": "~2.0"
+    "express-stormpath": "~1.0.5",
+    "express-http-proxy": "^0.6.0"
   },
   "scripts": {
     "start": "forever -w start index.js"
