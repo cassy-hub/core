@@ -32,11 +32,15 @@ app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
   var url = "http://cassyhub-api:80" + req.url.substring(4);
   console.log("Router proxy forwarding to " + url);
 
+  var userID = req.user.href.split('/').pop();
   var options = {
     url: url,
-    method: req.method
+    method: req.method,
+    headers: {
+      'userid': userID
+    }
   };
-
+  
   if (req.files && !_.isEqual(req.files, {})) {
     options.formData = {};
     options.headers = {};

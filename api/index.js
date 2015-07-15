@@ -20,7 +20,7 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
   var payload = {
     op: 'find',
     match: {
-      'userid': 123
+      'userid': req.headers.userid
     }
   }
   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
@@ -52,7 +52,7 @@ app.post('/documents', function (req, res) {
   var payload = {
     op: 'upsert',
      match: {
-       'userid': 123
+       'userid': req.headers.userid
      },
      doc: update
    };
@@ -73,7 +73,7 @@ app.delete('/documents', function (req, res) {
   var payload = {
     op: 'unset',
      match: {
-       'userid': 123
+       'userid': req.headers.userid
      },
      path: tag
    };

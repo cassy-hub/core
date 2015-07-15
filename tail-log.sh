@@ -26,7 +26,7 @@ if [[ "$containerID" != "" ]]; then
 	echo "Tailing log file: '"$logfile"' for container: '"$containerID"'"
 	echo ""
 	echo ""
-	docker exec $containerID tail -f $logfile
+	docker exec $containerID tail -f -n 50 $logfile
 
 else
 	echo "ERROR: Could not find container with name: '"$containerName"'"
