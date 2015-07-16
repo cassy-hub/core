@@ -38,7 +38,7 @@ define(function(require) {
       return (
         <div>
           <HeaderBar />
-          <div>
+          <div className="container content">
             <h3>404 - <strong>Not Found</strong></h3>
             <p>This page doesn't exist!!</p>
           </div>

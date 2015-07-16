@@ -35,6 +35,7 @@ define(function(require) {
               <NavItemLink to="/">Home</NavItemLink>
               <DropdownButton eventKey={3} title='Content'>
                 <NavItemLink to="/document/new">Create new document</NavItemLink>
+                <NavItemLink to="/documents">List all document</NavItemLink>
                 <MenuItem divider />
                 <MenuItem eventKey='1'>Document 1</MenuItem>
                 <MenuItem eventKey='2'>Document 2</MenuItem>
@@ -46,6 +47,8 @@ define(function(require) {
                 <MenuItem divider />
                 <MenuItem eventKey='3' href='/logout'>Logout</MenuItem>
               </DropdownButton>
+            </Nav>
+            <Nav className="pull-right">
               <NavItem eventKey={1} href='#'>Help</NavItem>
             </Nav>
           </Navbar>

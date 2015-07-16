@@ -18,7 +18,7 @@ define(function(require) {
       return (
         <div>
           <HeaderBar user={user}/>
-          <div>
+          <div className="container content">
             <h3>Welcome to <strong>Cassy Hub</strong></h3>
             <p>Create an account to access the goodness</p>
           </div>

@@ -61,7 +61,7 @@ define(function(require) {
       return (
         <div>
           <HeaderBar user={user}/>
-          <div>
+          <div className="container content">
             <h3>Create a new document</h3>
               <Input
                 type='text'
