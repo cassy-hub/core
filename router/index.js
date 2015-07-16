@@ -5,6 +5,8 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var _ = require('lodash');
 var fs = require('fs');
+var path = require('path');
+var cassyhub = require('./cassy-hub');
 
 // Constants
 var PORT = 80;
@@ -15,6 +17,10 @@ app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
 app.use(express.static('public'));
+app.use(cassyhub.init)
+
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(stormpath.init(app, {
   apiKeyId: '4I5B71C5G3FZOLO7RYJVMAWAT',
@@ -23,6 +29,10 @@ app.use(stormpath.init(app, {
   secretKey: 'some_long_random_string',
   enableForgotPassword: true
 }));
+
+app.get('/test', function (req, res) {
+  res.render("index");
+});
 
 app.get('/get-user', function (req, res) {
   res.send(req.user ? {
@@ -45,7 +55,7 @@ app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
 });
 
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.all(/^\/api-public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-public\/public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
 
 function proxy (req, res) {
   var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf("/", 1));
