@@ -6,8 +6,10 @@ require.config({
     'jsx': 'vendor/jsx-requirejs-plugin/js/jsx',
     'text': 'vendor/text/text',
     'react-bootstrap': 'vendor/react-bootstrap/react-bootstrap',
+    'react-router-bootstrap': 'vendor/react-router-bootstrap/lib/ReactRouterBootstrap',
     'quill': 'vendor/quill/dist/quill',
     'react-quill': 'assets/js/react-quill/dist/react-quill',
+    'react-router': 'vendor/react-router/build/umd/ReactRouter',
     'jquery': 'vendor/jquery/dist/jquery',
     'lodash': 'vendor/lodash/index'
   },

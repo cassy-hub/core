@@ -2,6 +2,7 @@ define(function(require) {
 
   var React = require('react');
   var ReactBootstrap = require('react-bootstrap');
+  var ReactRouterBootstrap = require('react-router-bootstrap');
 
   var HeaderBar = React.createClass({
 
@@ -11,15 +12,27 @@ define(function(require) {
       var NavItem = ReactBootstrap.NavItem;
       var DropdownButton = ReactBootstrap.DropdownButton;
       var MenuItem = ReactBootstrap.MenuItem;
-      var user = this.props.user
+      var user = this.props.user;
+
+      var logo = (
+          <span class="logo">
+              <img src="favicon.ico" className="pull-left" />
+              &nbsp;<a href="/">
+                CassyHub
+              </a>
+          </span>
+        );
+
+
+      var NavItemLink = ReactRouterBootstrap.NavItemLink;
 
       if (user) {
         return (
-          <Navbar brand='Cassy Hub'>
+          <Navbar brand={logo}>
             <Nav>
-              <NavItem eventKey={1} href='#'>Home</NavItem>
+              <NavItemLink to="/">Home</NavItemLink>
               <DropdownButton eventKey={3} title='Content'>
-                <MenuItem eventKey='4'>Create new document</MenuItem>
+                <NavItemLink to="/document/new">Create new document</NavItemLink>
                 <MenuItem divider />
                 <MenuItem eventKey='1'>Document 1</MenuItem>
                 <MenuItem eventKey='2'>Document 2</MenuItem>

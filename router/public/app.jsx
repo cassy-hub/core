@@ -4,44 +4,24 @@ define(function(require) {
 
   var React = require('react');
 
+  var Router = require('react-router');
+  var DefaultRoute = Router.DefaultRoute;
+  var Route = Router.Route;
+  var RouteHandler = Router.RouteHandler;
+
   var HomePage = require('jsx!components/HomePage');
   var MemberHome = require('jsx!components/MemberHome');
+  var NewDocument = require('jsx!components/documents/NewDocument');
   var NoMatch = require('jsx!components/NoMatch');
 
   var App = React.createClass({
-    getInitialState() {
-      return {
-        route: window.location.hash.substr(1)
-      };
-    },
-
-    componentDidMount() {
-      window.addEventListener('hashchange', function() {
-        this.setState({
-          route: window.location.hash.substr(1)
-        });
-      });
-    },
 
     render() {
-      var Child;
       var user = this.props.user;
-
-      switch (this.state.route) {
-        case '':
-          if (user) {
-            Child = MemberHome;
-          } else {
-            Child = HomePage;
-          }
-          break;
-        default:
-          Child = NoMatch;
-      }
 
       return (
         <div className='container'>
-          <Child user={user} />
+          <RouteHandler user={user} />
         </div>
       );
     }
@@ -53,7 +33,23 @@ define(function(require) {
     method: 'get',
     cache: false,
     success: function(data) {
-      React.render((<App user={data} />), document.body);
+      var homePage;
+      if (data) {
+        homePage = (<Route name="home" path="/" handler={MemberHome}/>);
+      } else {
+        homePage = (<Route name="home" path="/" handler={HomePage}/>);
+      }
+      var routes = (
+        <Route name="app" path="/" handler={App}>
+          {homePage}
+          <Route name="document" path="/document/new" handler={NewDocument}/>
+          <DefaultRoute handler={NoMatch}/>
+        </Route>
+      );
+
+      Router.run(routes, Router.HistoryLocation, function (Handler) {
+        React.render(<Handler user={data} />, document.body);
+      });
     },
     error: function(xhr, status, err) {
       console.log(status, err.toString());

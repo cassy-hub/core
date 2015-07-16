@@ -8,3 +8,8 @@ body {
   border: 1px solid rgb(187, 187, 187);
   height: 200px;
 }
+
+
+.navbar-brand img {
+  margin-top: 1px;
+}

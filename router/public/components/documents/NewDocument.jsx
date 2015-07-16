@@ -9,7 +9,7 @@ define(function(require) {
   var HeaderBar = require('jsx!components/globals/HeaderBar');
   var FooterBar = require('jsx!components/globals/FooterBar');
 
-  var MemberHome = React.createClass({
+  var NewDocument = React.createClass({
     getInitialState: function() {
       return {
         tag: '',
@@ -59,8 +59,24 @@ define(function(require) {
         <div>
           <HeaderBar user={user}/>
           <div>
-            <h3>Hello <strong>{user.fullName}</strong></h3>
-            <p>Let it be said that {user.givenName} the great has done it again!</p>
+            <h3>Create a new document</h3>
+              <Input
+                type='text'
+                value={this.state.tag}
+                placeholder='Enter tag'
+                label='Enter a tag for your document'
+                bsStyle={this.validationState()}
+                hasFeedback
+                ref='input'
+                groupClassName='group-class'
+                labelClassName='label-class'
+                onChange={this.onTagChange} />
+
+              <label>Enter your content:</label>
+            <ReactQuill theme='snow' value={this.state.data} onChange={this.onTextChange} />
+            <hr />
+            <Button bsStyle='default' onClick={this.handleClick}>Cancel</Button>
+            <Button bsStyle='success' className='pull-right' onClick={this.handleClick}>Insert Document</Button>
           </div>
           <FooterBar />
         </div>
@@ -69,5 +85,5 @@ define(function(require) {
 
   });
 
-  return MemberHome;
+  return NewDocument;
 });
