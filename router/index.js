@@ -24,14 +24,14 @@ app.use(stormpath.init(app, {
   enableForgotPassword: true
 }));
 
+app.get('/get-api-keys', stormpath.loginRequired, function (req, res) {
+  res.locals.user.getApiKeys(function(err, collectionResult) {
+    res.send( collectionResult );
+  });
+});
+
 app.get('/get-user', function (req, res) {
-  res.send(req.user ? {
-    'username': req.user.username,
-    'givenName': req.user.givenName,
-    'middleName': req.user.middleName,
-    'surname': req.user.surname,
-    'fullName': req.user.fullName,
-  }: 'false');
+  res.send(req.user ? req.user: 'false');
 });
 
 app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
@@ -44,11 +44,27 @@ app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
   });
 });
 
+app.delete('/delete-api-key/:apiId', stormpath.loginRequired, function(req, res) {
+  res.locals.user.getApiKeys(function(err, apiKeys) {
+    if (err) {
+      res.json(503, { error: 'Something went wrong. Please try again.' });
+    } else {
+      apiKeys.each(function(apiKey) {
+        if (apiKey.id === req.params.apiId) {
+          apiKey.delete(function(){
+            res.json({ status: 'success' });
+          });
+        }
+      });
+    }
+  });
+});
+
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
 app.all(/^\/api-public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
 
 function proxy (req, res) {
-  var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf("/", 1));
+  var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));
   console.log('Router proxy forwarding to ' + url);
 
   var userID = req.user.href.split('/').pop();

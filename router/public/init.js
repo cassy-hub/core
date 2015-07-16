@@ -7,6 +7,7 @@ require.config({
     'text': 'vendor/text/text',
     'react-bootstrap': 'vendor/react-bootstrap/react-bootstrap',
     'react-router-bootstrap': 'vendor/react-router-bootstrap/lib/ReactRouterBootstrap',
+    'react-bootstrap-treeview': 'assets/js/react-bootstrap-treeview',
     'quill': 'vendor/quill/dist/quill',
     'react-quill': 'assets/js/react-quill/dist/react-quill',
     'react-router': 'vendor/react-router/build/umd/ReactRouter',
@@ -28,6 +29,10 @@ require.config({
     },
     'react-router': {
       exports: 'ReactRouter',
+      deps: ['react']
+    },
+    'react-bootstrap-treeview': {
+      exports: 'TreeView',
       deps: ['react']
     }
   }

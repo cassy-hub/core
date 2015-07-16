@@ -13,6 +13,7 @@ define(function(require) {
   var MemberHome = require('jsx!components/MemberHome');
   var NewDocument = require('jsx!components/documents/NewDocument');
   var ListDocuments = require('jsx!components/documents/ListDocuments');
+  var ApiManagement = require('jsx!components/api/ApiManagement');
   var NoMatch = require('jsx!components/NoMatch');
 
   var App = React.createClass({
@@ -43,6 +44,7 @@ define(function(require) {
           {homePage}
           <Route name="new-document" path="/document/new" handler={NewDocument}/>
           <Route name="list-document" path="/documents" handler={ListDocuments}/>
+          <Route name="api-list" path="/my-api/list" handler={ApiManagement}/>
           <DefaultRoute handler={NoMatch}/>
         </Route>
       );

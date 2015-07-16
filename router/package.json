@@ -16,6 +16,6 @@
     "request": "*"
   },
   "scripts": {
-    "start": "forever start -w index.js"
+    "start": "pm2 start index.js --watch"
   }
 }
