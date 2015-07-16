@@ -1,0 +1,23 @@
+{
+  "name": "cassy-hub",
+  "description": "content as a service",
+  "version": "0.0.1",
+  "homepage": "",
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "author": "Cassy hub",
+  "main": "./index",
+  "keywords": [
+  ],
+  "directories": {
+    "lib": "."
+  },
+  "dependencies": {
+
+  },
+  "engines": {
+    "node": ">=0.8.0"
+  }
+}

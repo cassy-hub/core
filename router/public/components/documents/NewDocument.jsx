@@ -87,7 +87,7 @@ define(function(require) {
             <ReactQuill theme='snow' value={this.state.data} onChange={this.onContentChange} />
             <hr />
             <Button bsStyle='default' onClick={this.handleClick}>Cancel</Button>
-            <Button bsStyle='success' className='pull-right' onClick={this.handleClick}>Insert Document</Button>
+            <Button bsStyle='success' className='pull-right' onClick={this.handleClick}>Save Document</Button>
           </div>
           <FooterBar />
         </div>
