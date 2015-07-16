@@ -12,6 +12,7 @@ define(function(require) {
   var HomePage = require('jsx!components/HomePage');
   var MemberHome = require('jsx!components/MemberHome');
   var NewDocument = require('jsx!components/documents/NewDocument');
+  var ListDocuments = require('jsx!components/documents/ListDocuments');
   var NoMatch = require('jsx!components/NoMatch');
 
   var App = React.createClass({
@@ -20,9 +21,7 @@ define(function(require) {
       var user = this.props.user;
 
       return (
-        <div className='container'>
-          <RouteHandler user={user} />
-        </div>
+        <RouteHandler user={user} />
       );
     }
   });
@@ -42,7 +41,8 @@ define(function(require) {
       var routes = (
         <Route name="app" path="/" handler={App}>
           {homePage}
-          <Route name="document" path="/document/new" handler={NewDocument}/>
+          <Route name="new-document" path="/document/new" handler={NewDocument}/>
+          <Route name="list-document" path="/documents" handler={ListDocuments}/>
           <DefaultRoute handler={NoMatch}/>
         </Route>
       );
