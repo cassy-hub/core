@@ -10,7 +10,8 @@
     "mongodb": "~2.0",
     "request": "^2.58.0",
     "body-parser": "~1.13.2",
-    "lodash": "*"
+    "lodash": "*",
+    "key-del": "*"
   },
   "scripts": {
     "start": "forever -w start index.js"
