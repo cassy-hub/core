@@ -11,12 +11,14 @@ var cassyhub = require('./cassy-hub');
 // Constants
 var PORT = 80;
 
+var folder = 'public';
+
 // App
 var app = express();
 app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
-app.use(express.static('public'));
+app.use(express.static(folder));
 app.use(cassyhub.init)
 
 app.set('views', path.join(__dirname, 'views'));
@@ -119,7 +121,7 @@ function proxy(req, res) {
 }
 
 app.get('/*', function(req, res) {
-    res.sendfile('public/index.html');
+    res.sendfile(folder + '/index.html');
 });
 
 app.listen(PORT);

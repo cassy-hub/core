@@ -11,7 +11,7 @@
         "react-quill": "assets/js/react-quill/dist/react-quill",
         "react-router": "vendor/react-router/build/umd/ReactRouter",
         "jquery": "vendor/jquery/dist/jquery",
-        "lodash": "vendor/lodash/index"
+        "lodash": "vendor/lodash/lodash"
     },
 
     "jsx": {

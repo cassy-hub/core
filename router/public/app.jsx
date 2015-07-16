@@ -18,7 +18,7 @@ define(function(require) {
 
   var App = React.createClass({
 
-    render() {
+    render: function() {
       var user = this.props.user;
 
       return (
