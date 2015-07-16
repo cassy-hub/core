@@ -1,0 +1,14 @@
+{
+    "apps": [{
+        "name": "cassyRouter",
+        "cwd": "/app/",
+        "script": "index.js",
+        "watch": ["./"],
+        "ignore_watch": ["node_modules", "bower_components", "public"],
+        "watch_options": {
+            "followSymlinks": true,
+            "usePolling": true,
+            "interval": 300
+        }
+    }]
+}
