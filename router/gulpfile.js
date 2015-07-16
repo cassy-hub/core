@@ -14,7 +14,10 @@ gulp.task('copy-base', function() {
 gulp.task('compile-jsx', function() {
 
     var compileJsx = gulp.src('public/**/*.jsx')
-        .pipe(jsx())
+        .pipe(jsx({
+            factory: 'React.createElement',
+            passUnknownTagsToFactory: true
+        }))
         .pipe(ext_replace('.js'))
         .pipe(gulp.dest('dist'))
         .on('finish', function() {
