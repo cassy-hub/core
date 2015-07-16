@@ -3,6 +3,7 @@ var MongoClient = mongodb.MongoClient;
 var express = require('express');
 var q = require('q');
 var bodyParser = require('body-parser');
+var _ = require('lodash');
 
 // Constants
 var PORT = 80;
@@ -25,13 +26,16 @@ app.post('/:collectionName', function (req, res) {
 			switch(body.op)
 			{
 				case "find":
-					return findDocuments(db, collectionName, body.match);
+					return findDocuments(db, collectionName, parseMatch(body.match));
 				break;
-				case "upsert":
-					return upsertDocuments(db, collectionName, body.match, body.doc)
+				case "insert":
+					return insertDocuments(db, collectionName, body.doc)
+				break;
+				case "update":
+					return updateDocuments(db, collectionName, parseMatch(body.match), body.doc)
 				break;
 				case "unset":
-					return unsetDocuments(db, collectionName, body.match, body.path)
+					return unsetDocuments(db, collectionName, parseMatch(body.match))
 				break;
 				default:
 					console.log("unknown DAL op: ", body.op);
@@ -54,6 +58,9 @@ app.post('/:collectionName', function (req, res) {
 
 var findDocuments = function(db, collectionName, match) {
 	var deferred = q.defer();
+	console.log("");
+	console.log(match);
+	console.log("");
 	db.collection(collectionName).find(match).toArray(function(err, result){
 		if(err){
 			deferred.reject(err);
@@ -64,9 +71,9 @@ var findDocuments = function(db, collectionName, match) {
 	return deferred.promise;
 };
 
-var upsertDocuments = function(db, collectionName, match, doc) {
+var insertDocuments = function(db, collectionName, doc) {
   var deferred = q.defer();
-	db.collection(collectionName).update(match, {$set: doc}, {upsert: true}, function(err, result){
+	db.collection(collectionName).insert(doc, function(err, result){
 		if(err){
 			deferred.reject(err);
 		}else{
@@ -76,11 +83,21 @@ var upsertDocuments = function(db, collectionName, match, doc) {
 	return deferred.promise
 };
 
-var unsetDocuments = function(db, collectionName, match, path) {
+var updateDocuments = function(db, collectionName, match, doc) {
   var deferred = q.defer();
-	var doc = {};
-  doc[path] = "";
-  db.collection(collectionName).update(match, {$unset: doc},function(err, result){
+	db.collection(collectionName).update(match, {$set: doc}, function(err, result){
+		if(err){
+			deferred.reject(err);
+		}else{
+			deferred.resolve(result);
+		}
+	});
+	return deferred.promise
+};
+
+var unsetDocuments = function(db, collectionName, match) {
+  var deferred = q.defer();
+  db.collection(collectionName).remove(match, function(err, result){
 		if(err){
 			deferred.reject(err);
 		}else{
@@ -89,6 +106,15 @@ var unsetDocuments = function(db, collectionName, match, path) {
 	});
 	return deferred.promise;
 };
+
+var parseMatch = function(matchObject){
+	_.each(matchObject, function(val, key){
+		if(typeof val === 'object' && val.regex){
+			matchObject[key] = new RegExp(val.regex, 'g');
+		}
+	});
+	return matchObject;
+}
 
 var getDB = function() {
 	var deferred = q.defer();

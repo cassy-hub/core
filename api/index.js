@@ -16,39 +16,88 @@ app.get('/_test', function (req, res) {
   res.send('Hi! The time is: ' + new Date().toString());
 });
 
+//todo: remove comment
+
 app.get(/^\/tree\/(.*)/, function (req, res) {
-  console.log('API GET /documents');
+  console.log('API GET /tree');
+  var query = '^'+_.trimRight(req.params[0], '/') + '\\/';
   var payload = {
     op: 'find',
     match: {
-      'userid': req.headers.userid
+      'userid': req.headers.userid,
+      'tags': {
+        'regex': query
+      }
     }
   }
+  console.log(payload);
   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
       res.send("error from api -> dal");
       return;
     }
-    var params = req.params[0].split('/').join(".");
-    result = result.body[0];
-    if (params){
-      result = _.get(result, params);
-    }
+    //console.log("API tree GET result: ", result);
+    var content;
+    result = result.body;
+    if (!result) {
+      result = "Document not found"
+    }else{
+      var tree = [];
 
-    result = shortenKey(_.chain(result).omit('userid').omit('_id').value(), "content");
+
+      //each document
+      _.each(result, function(dataObj) {
+
+        var tagsArr = dataObj.tags.split('/');
+        tagsArr.splice(-1,1);
+        //each tag layer
+        var child = tree;
+        var newChild;
+        _.each(tagsArr, function(tagSection, i) {
+
+          newChild = _.find(child, 'tag', tagSection);
+          if(newChild === undefined){
+            if(i == tagsArr.length-1){
+                newChild = dataObj;
+            }else{
+              newChild = {};
+            }
+            newChild.tag = tagSection;
+            newChild.children = newChild.children || [];
+            child.push(newChild);
+          } else {
+            if(i == tagsArr.length-1){
+              _.extend(newChild, dataObj);
+            }
+          }
+            child = newChild.children;
+
+        });
+
+      });
+
+      result = tree;
+
+    }
     res.send(result);
-  });
+	});
 });
 
+
+/***
+** GET DOCUMENT (by tags)
+**/
 app.get(/^\/documents\/(.*)/, function (req, res) {
   console.log('API GET /documents');
   var payload = {
     op: 'find',
     match: {
-      'userid': req.headers.userid
+      'userid': req.headers.userid,
+      'tags': req.params[0]
     }
   }
+
   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
@@ -56,32 +105,56 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
       return;
     }
     console.log("API GET result: ", result);
-    var params = req.params[0].split('/').join(".");
     var content;
     result = result.body;
-    if (!_.get(result[0], params)) {
-      content = "Tag not found"
-    } else if (_.get(result[0], params).document) {
-      content = _.get(result[0], params).document.content
-    } else {
-      content = "No content found for tag"
+    if (!result) {
+      result = "Document not found"
     }
-    res.send(content);
+    res.send(result);
 	});
 });
 
+
+/***
+** INSERT DOCUMENT
+**/
 app.post('/documents', function (req, res) {
   console.log('API POST /documents');
-  var tag = req.body.tags.split("/").join(".");
-  var update = {};
-  update[tag + ".document"] = req.body;
+  if(!_.endsWith(req.body.tags, '/')){
+    req.body.tags += '/';
+  }
   var payload = {
-    op: 'upsert',
-     match: {
-       'userid': req.headers.userid
-     },
-     doc: update
+    op: 'insert',
+    doc: req.body
    };
+   payload.doc.userid = req.headers.userid;
+   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
+     if(error){
+      console.log(error);
+      res.send("error from api -> dal");
+      return;
+    }
+		res.send(result.body);
+	});
+});
+
+/***
+** UPDATE DOCUMENT
+**/
+app.put('/documents', function (req, res) {
+  console.log('API PUT /documents');
+  if(!_.endsWith(req.body.tags, '/')){
+    req.body.tags += '/';
+  }
+  var payload = {
+    op: 'update',
+     match: {
+       'userid': req.headers.userid,
+       'tags': req.body.tags
+     },
+     doc: req.body
+   };
+   payload.doc.userid = req.headers.userid;
   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
       console.log(error);
@@ -93,15 +166,18 @@ app.post('/documents', function (req, res) {
 });
 
 
+
+/***
+** DELETE DOCUMENT
+**/
 app.delete('/documents', function (req, res) {
   console.log('API DELETE /documents');
-  var tag = req.body.tags.split("/").join(".");
   var payload = {
     op: 'unset',
      match: {
-       'userid': req.headers.userid
-     },
-     path: tag
+       'userid': req.headers.userid,
+       'tags': req.body.tags
+     }
    };
   request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
     if(error){
