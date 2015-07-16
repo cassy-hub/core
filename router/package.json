@@ -1,22 +1,29 @@
 {
-    "name": "cassy-router",
-    "private": true,
-    "version": "0.0.1",
-    "description": "Router to combine all the cassy modules",
-    "author": [],
-    "dependencies": {
-        "body-parser": "*",
-        "bower": "^1.4.1",
-        "express": "3.2.4",
-        "express-http-proxy": "^0.6.0",
-        "express-stormpath": "~1.0.5",
-        "jquery": "^2.1.4",
-        "lodash": "^3.10.0",
-        "mongodb": "~2.0",
-        "request": "*",
-        "ejs": "0.8.8"
-    },
-    "scripts": {
-        "start": "pm2 start process.json --watch"
-    }
+  "name": "cassy-router",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Router to combine all the cassy modules",
+  "author": [],
+  "dependencies": {
+    "body-parser": "*",
+    "bower": "^1.4.1",
+    "express": "3.2.4",
+    "express-http-proxy": "^0.6.0",
+    "express-stormpath": "~1.0.5",
+    "jquery": "^2.1.4",
+    "lodash": "^3.10.0",
+    "mongodb": "~2.0",
+    "request": "*",
+    "ejs": "0.8.8"
+  },
+  "scripts": {
+    "start": "pm2 start process.json --watch",
+    "build": "node build"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-copy": "0.0.2",
+    "gulp-ext-replace": "^0.2.0",
+    "gulp-jsx": "^2.0.0"
+  }
 }

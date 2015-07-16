@@ -39,4 +39,4 @@ require.config({
 
 });
 
-requirejs(['jsx!app']);
+requirejs(['app']);
