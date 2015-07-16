@@ -61,8 +61,8 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
     result = result.body;
     if (!_.get(result[0], params)) {
       content = "Tag not found"
-    } else if (_.get(result[0], params).content) {
-      content = _.get(result[0], params).content
+    } else if (_.get(result[0], params).document) {
+      content = _.get(result[0], params).document.content
     } else {
       content = "No content found for tag"
     }
@@ -74,7 +74,7 @@ app.post('/documents', function (req, res) {
   console.log('API POST /documents');
   var tag = req.body.tags.split("/").join(".");
   var update = {};
-  update[tag + ".content"] = req.body.content;
+  update[tag + ".document"] = req.body;
   var payload = {
     op: 'upsert',
      match: {

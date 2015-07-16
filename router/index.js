@@ -34,8 +34,21 @@ app.get('/get-user', function (req, res) {
   }: 'false');
 });
 
-app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
-  var url = 'http://cassyhub-api:80' + req.url.substring(4);
+app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
+  req.user.createApiKey(function(err, apiKey) {
+    if (err) {
+      res.json(503, { error: 'Something went wrong. Please try again.' });
+    } else {
+      res.json({ id: apiKey.id, secret: apiKey.secret });
+    }
+  });
+});
+
+app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
+app.all(/^\/api-public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+
+function proxy (req, res) {
+  var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf("/", 1));
   console.log('Router proxy forwarding to ' + url);
 
   var userID = req.user.href.split('/').pop();
@@ -46,11 +59,11 @@ app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
       'userid': userID
     }
   };
-  
+
   if (req.files && !_.isEqual(req.files, {})) {
     options.formData = {};
     options.headers = {};
-     _.each(req.files, function(file, i) {
+    _.each(req.files, function(file, i) {
       options.formData['file' + i] = fs.createReadStream(file.path);
     });
   }
@@ -67,7 +80,7 @@ app.all(/^\/api\/(.*)/, stormpath.loginRequired, function(req, res) {
       res.send(result.body);
     }
   });
-});
+}
 
 app.get('/*', function (req, res) {
   res.sendfile('public/index.html');

@@ -16,6 +16,6 @@
     "request": "*"
   },
   "scripts": {
-    "start": "forever start index.js"
+    "start": "forever start -w index.js"
   }
 }
