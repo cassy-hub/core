@@ -13,9 +13,10 @@
     "jquery": "^2.1.4",
     "lodash": "^3.10.0",
     "mongodb": "~2.0",
-    "request": "*"
+    "request": "*",
+    "ejs": "0.8.8"
   },
   "scripts": {
-    "start": "forever start -w index.js"
+    "start": "pm2 start index.js --watch"
   }
 }

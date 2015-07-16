@@ -42,7 +42,7 @@ define(function(require) {
                 <MenuItem eventKey='3'>Document 3</MenuItem>
               </DropdownButton>
               <DropdownButton eventKey={4} title='Account'>
-                <MenuItem eventKey='1'>Settings</MenuItem>
+                <NavItemLink to="/my-api/list">Api Keys</NavItemLink>
                 <MenuItem eventKey='2'>Change Password</MenuItem>
                 <MenuItem divider />
                 <MenuItem eventKey='3' href='/logout'>Logout</MenuItem>

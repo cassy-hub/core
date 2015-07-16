@@ -43,3 +43,7 @@ h3 {
   border-bottom: 2px solid rgb(50, 185, 84);
   margin-bottom: 20px;
 }
+
+.button-in-header {
+  margin-top: 12px;
+}

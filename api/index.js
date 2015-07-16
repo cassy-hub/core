@@ -118,6 +118,35 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
 /***
 ** INSERT DOCUMENT
 **/
+app.get(/^\/public\/(.*)/, function (req, res) {
+  console.log('API GET /public');
+  var payload = {
+    op: 'find',
+    match: {
+      'userid': req.headers.userid
+    }
+  }
+  request.post({uri: 'http://cassyhub-dal:80/documents', json: payload}, function(error, result, body) {
+    if(error){
+      console.log(error);
+      res.send("error from api -> dal");
+      return;
+    }
+    console.log("API GET result: ", result);
+    var params = req.params[0].split('/').join(".");
+    var content;
+    result = result.body;
+    if (!_.get(result[0], params)) {
+      content = "Tag not found"
+    } else if (_.get(result[0], params).document && _.get(result[0], params).document.published === true) {
+      content = _.get(result[0], params).document.content
+    } else {
+      content = "No content found for tag"
+    }
+    res.send(content);
+  });
+});
+
 app.post('/documents', function (req, res) {
   console.log('API POST /documents');
   if(!_.endsWith(req.body.tags, '/')){
