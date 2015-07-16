@@ -38,7 +38,7 @@ app.get('/get-api-keys', stormpath.loginRequired, function (req, res) {
   res.locals.user.getApiKeys(function(err, collectionResult) {
     res.send( collectionResult );
   });
-}
+});
 
 app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
   req.user.createApiKey(function(err, apiKey) {
