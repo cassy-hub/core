@@ -65,8 +65,8 @@ define(function(require) {
 
       var apiKeyList = [];
 
-      _.each(this.state.apiKeys, function(apiKey) {
-        apiKeyList.push(<tr>
+      _.each(this.state.apiKeys, function(apiKey, idx) {
+        apiKeyList.push(<tr key={idx}>
           <td>{apiKey.id}</td>
           <td>{apiKey.secret}</td>
           <td><Button bsStyle="warning" onClick={this.deleteApiKey.bind(this, apiKey)}>Delete</Button></td>
