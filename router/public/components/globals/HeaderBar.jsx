@@ -1,6 +1,7 @@
 define(function(require) {
 
   var React = require('react');
+  var ReactRouter = require('react-router');
   var ReactBootstrap = require('react-bootstrap');
   var ReactRouterBootstrap = require('react-router-bootstrap');
 
@@ -13,13 +14,14 @@ define(function(require) {
       var DropdownButton = ReactBootstrap.DropdownButton;
       var MenuItem = ReactBootstrap.MenuItem;
       var user = this.props.user;
+      var Link = ReactRouter.Link;
 
       var logo = (
-          <span class="logo">
+          <span className="logo">
               <img src="favicon.ico" className="pull-left" />
-              &nbsp;<a href="/">
-                CassyHub
-              </a>
+              <Link to="/">
+                Cassy<strong>Hub</strong>
+              </Link>
           </span>
         );
 

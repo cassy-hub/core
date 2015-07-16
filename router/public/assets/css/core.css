@@ -13,3 +13,10 @@ body {
 .navbar-brand img {
   margin-top: 1px;
 }
+
+.logo {
+    font-size: 16px;
+}
+.logo img {
+    margin-right: 5px;
+}
