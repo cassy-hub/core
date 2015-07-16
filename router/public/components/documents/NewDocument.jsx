@@ -13,7 +13,7 @@ define(function(require) {
     getInitialState: function() {
       return {
         tag: '',
-        data: null
+        data: ''
       };
     },
 
@@ -60,19 +60,19 @@ define(function(require) {
           <HeaderBar user={user}/>
           <div>
             <h3>Create a new document</h3>
-              <Input
-                type='text'
-                value={this.state.tag}
-                placeholder='Enter tag'
-                label='Enter a tag for your document'
-                bsStyle={this.validationState()}
-                hasFeedback
-                ref='input'
-                groupClassName='group-class'
-                labelClassName='label-class'
-                onChange={this.onTagChange} />
+            <Input
+              type='text'
+              value={this.state.tag}
+              placeholder='Enter tag'
+              label='Enter a tag for your document'
+              bsStyle={this.validationState()}
+              hasFeedback
+              ref='input'
+              groupClassName='group-class'
+              labelClassName='label-class'
+              onChange={this.onTagChange} />
 
-              <label>Enter your content:</label>
+            <label>Enter your content:</label>
             <ReactQuill theme='snow' value={this.state.data} onChange={this.onTextChange} />
             <hr />
             <Button bsStyle='default' onClick={this.handleClick}>Cancel</Button>
