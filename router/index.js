@@ -30,6 +30,11 @@ app.use(stormpath.init(app, {
     enableForgotPassword: true
 }));
 
+app.get('/dev_init.js', function(req, res) {
+    var requirejsdata = require('./public/requirejs.json');
+    res.send('require.config(' + JSON.stringify(requirejsdata) + '); requirejs([\'jsx!app\']);');
+});
+
 app.get('/get-user', function(req, res) {
     res.send(req.user ? req.user : 'false');
 });
