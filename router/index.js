@@ -16,7 +16,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
-app.use(express.static(folder_for_static_content));
+app.use(express.static(folder_for_static_content, {index: 'disabled'}));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -117,10 +117,14 @@ function proxy(req, res) {
     });
 }
 
-app.get('/*', function(req, res) {
-    res.render('../' + folder_for_static_content + '/index.ejs', {
-      IN_DEVELOPMENT: folder_for_static_content === 'src' ? true : false
-    });
+app.get('*', function(req, res) {
+  fs.readFile(folder_for_static_content + '/index.html', 'utf8', function (err, html) {
+      if (err) { throw err; }
+      html = _.template(html)({ IN_PRODUCTION: folder_for_static_content === 'src' ? true : false });
+      res.writeHeader(200, {'Content-Type': 'text/html'});
+      res.write(html);
+      res.end();
+  });
 });
 
 app.listen(PORT);

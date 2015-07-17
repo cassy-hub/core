@@ -4,12 +4,21 @@ var ext_replace = require('gulp-ext-replace');
 var gulp_copy = require('gulp-copy');
 var gulp_replace = require('gulp-replace');
 var gulp_rjs = require('gulp-requirejs');
+var template = require('gulp-template');
 
 gulp.task('copy-base', function() {
     return gulp.src(['./**/*', '!**/*.jsx'], {
             cwd: './src/'
         })
         .pipe(gulp_copy('dist'));
+});
+
+gulp.task('html-template', ['copy-base'], function() {
+    return gulp.src(['./index.html'], {
+            cwd: './dist/'
+        })
+        .pipe(template({IN_PRODUCTION: true}))
+        .pipe(gulp.dest('dist'));
 });
 
 gulp.task('compile-jsx', function() {
@@ -55,4 +64,4 @@ gulp.task('merge_requirejs', ['copy-base', 'compile-jsx'], function() {
         .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('build', ['copy-base', 'compile-jsx', 'merge_requirejs']);
+gulp.task('build', ['copy-base', 'compile-jsx', 'merge_requirejs', 'html-template']);
