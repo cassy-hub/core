@@ -18,15 +18,17 @@ app.get('/_test', function (req, res) {
 
 //todo: remove comment
 
+/***
+** GET DOCUMENT TREE
+**/
 app.get(/^\/tree\/(.*)/, function (req, res) {
   console.log('API GET /tree');
-  var query = '^'+_.trimRight(req.params[0], '/') + '\\/';
   var payload = {
     op: 'find',
     match: {
       'userid': req.headers.userid,
       'tags': {
-        'regex': query
+        'regex': '^'+_.trimRight(req.params[0], '/') + '\\/'
       }
     }
   }
@@ -114,9 +116,8 @@ app.get(/^\/documents\/(.*)/, function (req, res) {
 	});
 });
 
-
 /***
-** INSERT DOCUMENT
+**
 **/
 app.get(/^\/public\/(.*)/, function (req, res) {
   console.log('API GET /public');
@@ -147,6 +148,9 @@ app.get(/^\/public\/(.*)/, function (req, res) {
   });
 });
 
+/***
+** INSERT DOCUMENT
+**/
 app.post('/documents', function (req, res) {
   console.log('API POST /documents');
   if(!_.endsWith(req.body.tags, '/')){
