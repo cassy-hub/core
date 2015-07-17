@@ -5,7 +5,7 @@ RUN     rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-
 RUN     yum install -y npm
 
 # Node Modules
-RUN npm install forever -g
+RUN npm install pm2 -g
 
 # Bundle app source
 COPY . /app/

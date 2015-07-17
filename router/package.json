@@ -17,6 +17,14 @@
     "ejs": "0.8.8"
   },
   "scripts": {
-    "start": "pm2 start index.js --watch"
+    "start": "pm2 start process.json --watch",
+    "build": "node build"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-copy": "0.0.2",
+    "gulp-ext-replace": "^0.2.0",
+    "gulp-jsx": "^2.0.0",
+    "gulp-requirejs": "^0.1.3"
   }
 }

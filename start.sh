@@ -1,6 +1,14 @@
 #!/bin/bash
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+# Are we trying to stop everything?
+if [[ "$1" == "stop" ]]; then
+  echo "Stopping all docker processes for cassyhub!"
+
+  docker rm $(docker kill $(docker ps -a -f "name=cassyhub-" -q))
+  exit
+fi
+
 # Install node modules locally
 cd $DIR/api/ && npm install
 cd $DIR/dal/ && npm install

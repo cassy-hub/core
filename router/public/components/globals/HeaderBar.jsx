@@ -71,5 +71,4 @@ define(function(require) {
 
   return HeaderBar;
 
-
 });
