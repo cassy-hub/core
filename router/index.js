@@ -9,7 +9,7 @@ var path = require('path');
 // Constants
 var PORT = 80;
 
-var folder_for_static_content = 'src';
+var folder_for_static_content = 'dist';
 
 // App
 var app = express();
@@ -120,7 +120,7 @@ function proxy(req, res) {
 app.get('*', function(req, res) {
   fs.readFile(folder_for_static_content + '/index.html', 'utf8', function (err, html) {
       if (err) { throw err; }
-      html = _.template(html)({ IN_PRODUCTION: folder_for_static_content === 'src' ? true : false });
+      html = _.template(html)({ IN_PRODUCTION: folder_for_static_content === 'src' ? false : true });
       res.writeHeader(200, {'Content-Type': 'text/html'});
       res.write(html);
       res.end();
