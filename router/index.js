@@ -5,6 +5,7 @@ var request = require('request');
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
+var cassyhub = require('./cassy-hub');
 
 // Constants
 var PORT = 80;
@@ -17,6 +18,12 @@ app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
 app.use(express.static(folder_for_static_content, {index: 'disabled'}));
+
+cassyhub.config({
+    "id": "4DUBQGZ2OZR6DGUM9FFEO37UI",
+    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU"
+});
+app.use(cassyhub.init);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -42,6 +49,10 @@ app.get('/get-api-keys', stormpath.loginRequired, function(req, res) {
     res.locals.user.getApiKeys(function(err, collectionResult) {
         res.send(collectionResult);
     });
+});
+
+app.get('/test', function (req, res) {
+    res.render("index");
 });
 
 app.get('/create-api-key', stormpath.loginRequired, function(req, res) {
