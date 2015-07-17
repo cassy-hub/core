@@ -11,7 +11,7 @@ RUN npm install pm2 -g
 COPY . /app/
 
 # Install app dependencies
-RUN cd /app; npm install #&& ./node_modules/.bin/gulp build
+RUN cd /app; npm install && ./node_modules/.bin/gulp build
 
 EXPOSE  80
 CMD cd /app && npm start && bash
