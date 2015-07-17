@@ -9,7 +9,7 @@ var path = require('path');
 // Constants
 var PORT = 80;
 
-var folder_for_static_content = 'dist';
+var folder_for_static_content = 'src';
 
 // App
 var app = express();
