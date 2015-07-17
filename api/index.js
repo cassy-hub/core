@@ -32,55 +32,15 @@ app.get(/^\/tree\/(.*)/, function(req, res) {
     request.post({
         uri: 'http://cassyhub-dal:80/documents',
         json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        //console.log('API tree GET result: ', result);
-        result = result.body;
-        if (!result) {
-            result = 'Document not found';
+    }, function(error, dalResult) {
+        if(error) {
+          console.log(error);
+          res.send('error from api -> dal');
+        } else if(dalResult.body) {
+          res.send(require('./treebuilder').buildTree(dalResult.body, 'tags', '/', 'tag'));
         } else {
-            var tree = [];
-
-
-            //each document
-            _.each(result, function(dataObj) {
-
-                var tagsArr = dataObj.tags.split('/');
-                tagsArr.splice(-1, 1);
-                //each tag layer
-                var child = tree;
-                var newChild;
-                _.each(tagsArr, function(tagSection, i) {
-
-                    newChild = _.find(child, 'tag', tagSection);
-                    if (newChild === undefined) {
-                        if (i === tagsArr.length - 1) {
-                            newChild = dataObj;
-                        } else {
-                            newChild = {};
-                        }
-                        newChild.tag = tagSection;
-                        newChild.children = newChild.children || [];
-                        child.push(newChild);
-                    } else {
-                        if (i === tagsArr.length - 1) {
-                            _.extend(newChild, dataObj);
-                        }
-                    }
-                    child = newChild.children;
-
-                });
-
-            });
-
-            result = tree;
-
+          res.send('Document not found');
         }
-        res.send(result);
     });
 });
 
