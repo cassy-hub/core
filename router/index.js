@@ -1,12 +1,10 @@
 var express = require('express');
-//var proxy = require('express-http-proxy');
 var stormpath = require('express-stormpath');
 var bodyParser = require('body-parser');
 var request = require('request');
 var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
-var cassyhub = require('./cassy-hub');
 
 // Constants
 var PORT = 80;
@@ -19,7 +17,6 @@ app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
 app.use(express.static(folder_for_static_content));
-app.use(cassyhub.init)
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
