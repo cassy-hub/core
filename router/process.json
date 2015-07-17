@@ -4,7 +4,7 @@
         "cwd": "/app/",
         "script": "index.js",
         "watch": ["./"],
-        "ignore_watch": ["node_modules", "bower_components", "public"],
+        "ignore_watch": ["node_modules", "bower_components", "src", "dist"],
         "watch_options": {
             "followSymlinks": true,
             "usePolling": true,
