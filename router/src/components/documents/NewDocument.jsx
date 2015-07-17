@@ -38,12 +38,13 @@ define(function(require) {
       $.ajax({
         url: '/api/documents',
         method: 'post',
-        data: {
+        data: JSON.stringify({
           'title': this.state.title,
           'tags': this.state.tag,
           'content': this.state.content
-        },
+        }),
         dataType: 'json',
+        contentType: 'application/json',
         success: function() {
           self.transitionTo('/');
         },
