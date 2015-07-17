@@ -76,18 +76,17 @@ app.get(/^\/documents\/(.*)/, function(req, res) {
     });
 });
 
-
-/***
- ** INSERT DOCUMENT
- **/
 app.get(/^\/public\/(.*)/, function(req, res) {
-    console.log('API GET /public');
+    console.log('API GET /documents');
     var payload = {
         op: 'find',
         match: {
-            'userid': req.headers.userid
+            'userid': req.headers.userid,
+            'tags': req.params[0],
+            'published': true
         }
     };
+
     request.post({
         uri: 'http://cassyhub-dal:80/documents',
         json: payload
@@ -98,17 +97,11 @@ app.get(/^\/public\/(.*)/, function(req, res) {
             return;
         }
         console.log('API GET result: ', result);
-        var params = req.params[0].split('/').join('.');
-        var content;
         result = result.body;
-        if (!_.get(result[0], params)) {
-            content = 'Tag not found';
-        } else if (_.get(result[0], params).document && _.get(result[0], params).document.published === true) {
-            content = _.get(result[0], params).document.content;
-        } else {
-            content = 'No content found for tag';
+        if (!result) {
+            result = 'Document not found';
         }
-        res.send(content);
+        res.send(result);
     });
 });
 
@@ -172,11 +165,14 @@ app.put('/documents', function(req, res) {
  **/
 app.delete('/documents', function(req, res) {
     console.log('API DELETE /documents');
+    var query = '^' + _.trimRight(req.body.tags, '/') + '\\/';
     var payload = {
         op: 'unset',
         match: {
             'userid': req.headers.userid,
-            'tags': req.body.tags
+            'tags': {
+                'regex': query
+            }
         }
     };
     request.post({
