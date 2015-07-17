@@ -3,7 +3,6 @@ define(function(require) {
   var $ = require('jquery');
 
   var React = require('react');
-  var ReactBootstrap = require('react-bootstrap');
 
   var HeaderBar = require('components/globals/HeaderBar');
   var FooterBar = require('components/globals/FooterBar');
@@ -34,7 +33,6 @@ define(function(require) {
     },
 
     render: function() {
-      var Button = ReactBootstrap.Button;
       return (
         React.createElement('div', null, [
           React.createElement(HeaderBar),

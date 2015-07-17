@@ -1,7 +1,6 @@
 define(function(require) {
 
   var React = require('react');
-  var ReactBootstrap = require('react-bootstrap');
 
   var HeaderBar = require('components/globals/HeaderBar');
   var FooterBar = require('components/globals/FooterBar');
@@ -12,7 +11,6 @@ define(function(require) {
     },
 
     render: function() {
-      var Button = ReactBootstrap.Button;
       var user = this.props.user;
 
       return (

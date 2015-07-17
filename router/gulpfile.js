@@ -7,14 +7,14 @@ var gulp_rjs = require('gulp-requirejs');
 
 gulp.task('copy-base', function() {
     return gulp.src(['./**/*', '!**/*.jsx'], {
-            cwd: './public/'
+            cwd: './src/'
         })
         .pipe(gulp_copy('dist'));
 });
 
 gulp.task('compile-jsx', function() {
 
-    var compileJsx = gulp.src('public/**/*.jsx')
+    var compileJsx = gulp.src('src/**/*.jsx')
         .pipe(jsx({
             factory: 'React.createElement',
             passUnknownTagsToFactory: true
@@ -34,22 +34,25 @@ gulp.task('compile-jsx', function() {
 });
 
 
-gulp.task('merge_requirejs', function() {
-    var requirejsdata = require('./public/requirejs.json');
+gulp.task('merge_requirejs', ['copy-base', 'compile-jsx'], function() {
+    var requirejsdata = require('./src/requirejs.json');
 
     requirejsdata = JSON.stringify(requirejsdata).replace(/"vendor\//g, '"../bower_components/');
     requirejsdata = JSON.parse(requirejsdata);
 
     gulp_rjs({
             baseUrl: './dist/',
-            name: 'app',
+            name: '../bower_components/almond/almond',
             out: 'bundle.js',
             paths: requirejsdata.paths,
             shim: {
                 // standard require.js shim options
-            }
+            },
+            wrap: true,
+            insertRequire: ['app'],
+            include: ['app']
         })
         .pipe(gulp.dest('./dist/'));
 });
 
-gulp.task('default', ['copy-base', 'compile-jsx', 'merge_requirejs']);
+gulp.task('build', ['copy-base', 'compile-jsx', 'merge_requirejs']);

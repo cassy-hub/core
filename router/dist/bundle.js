@@ -1,3 +1,436 @@
+(function () {
+/**
+ * @license almond 0.3.1 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/almond for details
+ */
+//Going sloppy to avoid 'use strict' string cost, but strict practices should
+//be followed.
+/*jslint sloppy: true */
+/*global setTimeout: false */
+
+var requirejs, require, define;
+(function (undef) {
+    var main, req, makeMap, handlers,
+        defined = {},
+        waiting = {},
+        config = {},
+        defining = {},
+        hasOwn = Object.prototype.hasOwnProperty,
+        aps = [].slice,
+        jsSuffixRegExp = /\.js$/;
+
+    function hasProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
+
+    /**
+     * Given a relative module name, like ./something, normalize it to
+     * a real name that can be mapped to a path.
+     * @param {String} name the relative name
+     * @param {String} baseName a real name that the name arg is relative
+     * to.
+     * @returns {String} normalized name
+     */
+    function normalize(name, baseName) {
+        var nameParts, nameSegment, mapValue, foundMap, lastIndex,
+            foundI, foundStarMap, starI, i, j, part,
+            baseParts = baseName && baseName.split("/"),
+            map = config.map,
+            starMap = (map && map['*']) || {};
+
+        //Adjust any relative paths.
+        if (name && name.charAt(0) === ".") {
+            //If have a base name, try to normalize against it,
+            //otherwise, assume it is a top-level require that will
+            //be relative to baseUrl in the end.
+            if (baseName) {
+                name = name.split('/');
+                lastIndex = name.length - 1;
+
+                // Node .js allowance:
+                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+                }
+
+                //Lop off the last part of baseParts, so that . matches the
+                //"directory" and not name of the baseName's module. For instance,
+                //baseName of "one/two/three", maps to "one/two/three.js", but we
+                //want the directory, "one/two" for this normalization.
+                name = baseParts.slice(0, baseParts.length - 1).concat(name);
+
+                //start trimDots
+                for (i = 0; i < name.length; i += 1) {
+                    part = name[i];
+                    if (part === ".") {
+                        name.splice(i, 1);
+                        i -= 1;
+                    } else if (part === "..") {
+                        if (i === 1 && (name[2] === '..' || name[0] === '..')) {
+                            //End of the line. Keep at least one non-dot
+                            //path segment at the front so it can be mapped
+                            //correctly to disk. Otherwise, there is likely
+                            //no path mapping for a path starting with '..'.
+                            //This can still fail, but catches the most reasonable
+                            //uses of ..
+                            break;
+                        } else if (i > 0) {
+                            name.splice(i - 1, 2);
+                            i -= 2;
+                        }
+                    }
+                }
+                //end trimDots
+
+                name = name.join("/");
+            } else if (name.indexOf('./') === 0) {
+                // No baseName, so this is ID is resolved relative
+                // to baseUrl, pull off the leading dot.
+                name = name.substring(2);
+            }
+        }
+
+        //Apply map config if available.
+        if ((baseParts || starMap) && map) {
+            nameParts = name.split('/');
+
+            for (i = nameParts.length; i > 0; i -= 1) {
+                nameSegment = nameParts.slice(0, i).join("/");
+
+                if (baseParts) {
+                    //Find the longest baseName segment match in the config.
+                    //So, do joins on the biggest to smallest lengths of baseParts.
+                    for (j = baseParts.length; j > 0; j -= 1) {
+                        mapValue = map[baseParts.slice(0, j).join('/')];
+
+                        //baseName segment has  config, find if it has one for
+                        //this name.
+                        if (mapValue) {
+                            mapValue = mapValue[nameSegment];
+                            if (mapValue) {
+                                //Match, update name to the new value.
+                                foundMap = mapValue;
+                                foundI = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (foundMap) {
+                    break;
+                }
+
+                //Check for a star map match, but just hold on to it,
+                //if there is a shorter segment match later in a matching
+                //config, then favor over this star map.
+                if (!foundStarMap && starMap && starMap[nameSegment]) {
+                    foundStarMap = starMap[nameSegment];
+                    starI = i;
+                }
+            }
+
+            if (!foundMap && foundStarMap) {
+                foundMap = foundStarMap;
+                foundI = starI;
+            }
+
+            if (foundMap) {
+                nameParts.splice(0, foundI, foundMap);
+                name = nameParts.join('/');
+            }
+        }
+
+        return name;
+    }
+
+    function makeRequire(relName, forceSync) {
+        return function () {
+            //A version of a require function that passes a moduleName
+            //value for items that may need to
+            //look up paths relative to the moduleName
+            var args = aps.call(arguments, 0);
+
+            //If first arg is not require('string'), and there is only
+            //one arg, it is the array form without a callback. Insert
+            //a null so that the following concat is correct.
+            if (typeof args[0] !== 'string' && args.length === 1) {
+                args.push(null);
+            }
+            return req.apply(undef, args.concat([relName, forceSync]));
+        };
+    }
+
+    function makeNormalize(relName) {
+        return function (name) {
+            return normalize(name, relName);
+        };
+    }
+
+    function makeLoad(depName) {
+        return function (value) {
+            defined[depName] = value;
+        };
+    }
+
+    function callDep(name) {
+        if (hasProp(waiting, name)) {
+            var args = waiting[name];
+            delete waiting[name];
+            defining[name] = true;
+            main.apply(undef, args);
+        }
+
+        if (!hasProp(defined, name) && !hasProp(defining, name)) {
+            throw new Error('No ' + name);
+        }
+        return defined[name];
+    }
+
+    //Turns a plugin!resource to [plugin, resource]
+    //with the plugin being undefined if the name
+    //did not have a plugin prefix.
+    function splitPrefix(name) {
+        var prefix,
+            index = name ? name.indexOf('!') : -1;
+        if (index > -1) {
+            prefix = name.substring(0, index);
+            name = name.substring(index + 1, name.length);
+        }
+        return [prefix, name];
+    }
+
+    /**
+     * Makes a name map, normalizing the name, and using a plugin
+     * for normalization if necessary. Grabs a ref to plugin
+     * too, as an optimization.
+     */
+    makeMap = function (name, relName) {
+        var plugin,
+            parts = splitPrefix(name),
+            prefix = parts[0];
+
+        name = parts[1];
+
+        if (prefix) {
+            prefix = normalize(prefix, relName);
+            plugin = callDep(prefix);
+        }
+
+        //Normalize according
+        if (prefix) {
+            if (plugin && plugin.normalize) {
+                name = plugin.normalize(name, makeNormalize(relName));
+            } else {
+                name = normalize(name, relName);
+            }
+        } else {
+            name = normalize(name, relName);
+            parts = splitPrefix(name);
+            prefix = parts[0];
+            name = parts[1];
+            if (prefix) {
+                plugin = callDep(prefix);
+            }
+        }
+
+        //Using ridiculous property names for space reasons
+        return {
+            f: prefix ? prefix + '!' + name : name, //fullName
+            n: name,
+            pr: prefix,
+            p: plugin
+        };
+    };
+
+    function makeConfig(name) {
+        return function () {
+            return (config && config.config && config.config[name]) || {};
+        };
+    }
+
+    handlers = {
+        require: function (name) {
+            return makeRequire(name);
+        },
+        exports: function (name) {
+            var e = defined[name];
+            if (typeof e !== 'undefined') {
+                return e;
+            } else {
+                return (defined[name] = {});
+            }
+        },
+        module: function (name) {
+            return {
+                id: name,
+                uri: '',
+                exports: defined[name],
+                config: makeConfig(name)
+            };
+        }
+    };
+
+    main = function (name, deps, callback, relName) {
+        var cjsModule, depName, ret, map, i,
+            args = [],
+            callbackType = typeof callback,
+            usingExports;
+
+        //Use name if no relName
+        relName = relName || name;
+
+        //Call the callback to define the module, if necessary.
+        if (callbackType === 'undefined' || callbackType === 'function') {
+            //Pull out the defined dependencies and pass the ordered
+            //values to the callback.
+            //Default to [require, exports, module] if no deps
+            deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
+            for (i = 0; i < deps.length; i += 1) {
+                map = makeMap(deps[i], relName);
+                depName = map.f;
+
+                //Fast path CommonJS standard dependencies.
+                if (depName === "require") {
+                    args[i] = handlers.require(name);
+                } else if (depName === "exports") {
+                    //CommonJS module spec 1.1
+                    args[i] = handlers.exports(name);
+                    usingExports = true;
+                } else if (depName === "module") {
+                    //CommonJS module spec 1.1
+                    cjsModule = args[i] = handlers.module(name);
+                } else if (hasProp(defined, depName) ||
+                           hasProp(waiting, depName) ||
+                           hasProp(defining, depName)) {
+                    args[i] = callDep(depName);
+                } else if (map.p) {
+                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
+                    args[i] = defined[depName];
+                } else {
+                    throw new Error(name + ' missing ' + depName);
+                }
+            }
+
+            ret = callback ? callback.apply(defined[name], args) : undefined;
+
+            if (name) {
+                //If setting exports via "module" is in play,
+                //favor that over return value and exports. After that,
+                //favor a non-undefined return value over exports use.
+                if (cjsModule && cjsModule.exports !== undef &&
+                        cjsModule.exports !== defined[name]) {
+                    defined[name] = cjsModule.exports;
+                } else if (ret !== undef || !usingExports) {
+                    //Use the return value from the function.
+                    defined[name] = ret;
+                }
+            }
+        } else if (name) {
+            //May just be an object definition for the module. Only
+            //worry about defining if have a module name.
+            defined[name] = callback;
+        }
+    };
+
+    requirejs = require = req = function (deps, callback, relName, forceSync, alt) {
+        if (typeof deps === "string") {
+            if (handlers[deps]) {
+                //callback in this case is really relName
+                return handlers[deps](callback);
+            }
+            //Just return the module wanted. In this scenario, the
+            //deps arg is the module name, and second arg (if passed)
+            //is just the relName.
+            //Normalize module name, if it contains . or ..
+            return callDep(makeMap(deps, callback).f);
+        } else if (!deps.splice) {
+            //deps is a config object, not an array.
+            config = deps;
+            if (config.deps) {
+                req(config.deps, config.callback);
+            }
+            if (!callback) {
+                return;
+            }
+
+            if (callback.splice) {
+                //callback is an array, which means it is a dependency list.
+                //Adjust args if there are dependencies
+                deps = callback;
+                callback = relName;
+                relName = null;
+            } else {
+                deps = undef;
+            }
+        }
+
+        //Support require(['a'])
+        callback = callback || function () {};
+
+        //If relName is a function, it is an errback handler,
+        //so remove it.
+        if (typeof relName === 'function') {
+            relName = forceSync;
+            forceSync = alt;
+        }
+
+        //Simulate async callback;
+        if (forceSync) {
+            main(undef, deps, callback, relName);
+        } else {
+            //Using a non-zero value because of concern for what old browsers
+            //do, and latest browsers "upgrade" to 4 if lower value is used:
+            //http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html#dom-windowtimers-settimeout:
+            //If want a value immediately, use require('id') instead -- something
+            //that works in almond on the global level, but not guaranteed and
+            //unlikely to work in other AMD implementations.
+            setTimeout(function () {
+                main(undef, deps, callback, relName);
+            }, 4);
+        }
+
+        return req;
+    };
+
+    /**
+     * Just drops the config on the floor, but returns req in case
+     * the config return value is used.
+     */
+    req.config = function (cfg) {
+        return req(cfg);
+    };
+
+    /**
+     * Expose module registry for debugging and tooling
+     */
+    requirejs._defined = defined;
+
+    define = function (name, deps, callback) {
+        if (typeof name !== 'string') {
+            throw new Error('See almond README: incorrect module build, no module name');
+        }
+
+        //This module may not have dependencies
+        if (!deps.splice) {
+            //deps is not an array, so probably means
+            //an object literal or factory function for
+            //the value. Adjust args.
+            callback = deps;
+            deps = [];
+        }
+
+        if (!hasProp(defined, name) && !hasProp(waiting, name)) {
+            waiting[name] = [name, deps, callback];
+        }
+    };
+
+    define.amd = {
+        jQuery: true
+    };
+}());
+
+define("../bower_components/almond/almond", function(){});
 
 /*!
  * jQuery JavaScript Library v2.1.4
@@ -42033,7 +42466,6 @@ define('components/globals/HeaderBar',['require','react','react-router','react-b
 
   return HeaderBar;
 
-
 });
 
 define('components/globals/FooterBar',['require','react','react-bootstrap'],function(require) {
@@ -42056,10 +42488,9 @@ define('components/globals/FooterBar',['require','react','react-bootstrap'],func
 
 });
 
-define('components/HomePage',['require','react','react-bootstrap','components/globals/HeaderBar','components/globals/FooterBar'],function(require) {
+define('components/HomePage',['require','react','components/globals/HeaderBar','components/globals/FooterBar'],function(require) {
 
   var React = require('react');
-  var ReactBootstrap = require('react-bootstrap');
 
   var HeaderBar = require('components/globals/HeaderBar');
   var FooterBar = require('components/globals/FooterBar');
@@ -42070,7 +42501,6 @@ define('components/HomePage',['require','react','react-bootstrap','components/gl
     },
 
     render: function() {
-      var Button = ReactBootstrap.Button;
       var user = this.props.user;
 
       return (
@@ -42124,7 +42554,7 @@ define('components/MemberHome',['require','react','components/globals/HeaderBar'
  *  Copyright (c) 2014, Jason Chen
  *  Copyright (c) 2013, salesforce.com
  */
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Quill = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define('quill',[],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Quill = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function (global){
 /**
  * @license
@@ -52627,508 +53057,9 @@ module.exports = SnowTheme;
 
 },{"../../lib/color-picker":16,"../../lib/dom":17,"../../lib/picker":19,"../base":32,"lodash":1}]},{},[15])(15)
 });
-define("quill", function(){});
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("react"), require("quill"));
-	else if(typeof define === 'function' && define.amd)
-		define('react-quill',["react", "quill"], factory);
-	else if(typeof exports === 'object')
-		exports["ReactQuill"] = factory(require("react"), require("quill"));
-	else
-		root["ReactQuill"] = factory(root["React"], root["Quill"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_5__) {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
-/******/ 			return installedModules[moduleId].exports;
-/******/
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			exports: {},
-/******/ 			id: moduleId,
-/******/ 			loaded: false
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.loaded = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(0);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
-/***/ function(module, exports, __webpack_require__) {
+define("react-quill", function(){});
 
-	/*
-	React-Quill v0.1.1
-	https://github.com/zenoamaro/react-quill
-	*/
-	module.exports = __webpack_require__(/*! ./component */ 1);
-	module.exports.Mixin = __webpack_require__(/*! ./mixin */ 4);
-	module.exports.Toolbar = __webpack_require__(/*! ./toolbar */ 3);
-
-
-/***/ },
-/* 1 */
-/*!**************************!*\
-  !*** ./src/component.js ***!
-  \**************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	
-	var React = __webpack_require__(/*! react */ 2),
-		QuillToolbar = __webpack_require__(/*! ./toolbar */ 3),
-		QuillMixin = __webpack_require__(/*! ./mixin */ 4),
-		T = React.PropTypes;
-	
-	// Support React 0.11 and 0.12
-	// FIXME: Remove with React 0.13
-	if (React.createFactory) {
-		QuillToolbar = React.createFactory(QuillToolbar);
-	}
-	
-	var QuillComponent = React.createClass({
-	
-		displayName: 'Quill',
-	
-		mixins: [ QuillMixin ],
-	
-		propTypes: {
-			id:           T.string,
-			className:    T.string,
-			value:        T.string,
-			defaultValue: T.string,
-			readOnly:     T.bool,
-			toolbar:      T.array,
-			formats:      T.array,
-			styles:       T.object,
-			theme:        T.string,
-			pollInterval: T.number,
-			onChange:     T.func
-		},
-	
-		getDefaultProps: function() {
-			return {
-				className: '',
-				theme: 'base',
-				modules: {}
-			};
-		},
-	
-		/*
-		Retrieve the initial value from either `value` (preferred)
-		or `defaultValue` if you want an un-controlled component.
-		*/
-		getInitialState: function() {
-			return {};
-		},
-	
-		/*
-		Update only if we've been passed a new `value`.
-		This leaves components using `defaultValue` alone.
-		*/
-		componentWillReceiveProps: function(nextProps) {
-			if ('value' in nextProps) {
-				if (nextProps.value !== this.props.value) {
-					this.setEditorContents(this.state.editor, nextProps.value);
-				}
-			}
-		},
-	
-		componentDidMount: function() {
-			var editor = this.createEditor(
-				this.getEditorElement(),
-				this.getEditorConfig());
-			this.setState({ editor:editor });
-		},
-	
-		componentWillUnmount: function() {
-			this.destroyEditor(this.state.editor);
-			// NOTE: Don't set the state to null here
-			//       as it would generate a loop.
-		},
-	
-		shouldComponentUpdate: function(nextProps, nextState) {
-			// Never re-render or we lose the element.
-			return false;
-		},
-	
-		/*
-		If for whatever reason we are rendering again,
-		we should tear down the editor and bring it up
-		again.
-		*/
-		componentWillUpdate: function() {
-			this.componentWillUnmount();
-		},
-	
-		componentDidUpdate: function() {
-			this.componentDidMount();
-		},
-	
-		getEditorConfig: function() {
-			var config = {
-				readOnly:     this.props.readOnly,
-				theme:        this.props.theme,
-				formats:      this.props.formats,
-				styles:       this.props.styles,
-				modules:      this.props.modules,
-				pollInterval: this.props.pollInterval
-			};
-			// Unless we're redefining the toolbar,
-			// attach to the default one as a ref.
-			if (!config.modules.toolbar) {
-				// Don't mutate the original modules
-				// because it's shared between components.
-				config.modules = JSON.parse(JSON.stringify(config.modules));
-				config.modules.toolbar = {
-					container: this.refs.toolbar.getDOMNode()
-				};
-			}
-			return config;
-		},
-	
-		getEditorElement: function() {
-			return this.refs.editor.getDOMNode();
-		},
-	
-		getEditorContents: function() {
-			return this.props.value || this.props.defaultValue || '';
-		},
-	
-		getClassName: function() {
-			return ['quill', this.props.className].join(' ');
-		},
-	
-		/*
-		Renders either the specified contents, or a default
-		configuration of toolbar and contents area.
-		*/
-		renderContents: function() {
-			if (React.Children.count(this.props.children)) {
-				return this.props.children;
-			} else {
-				return [
-					QuillToolbar({
-						key:'toolbar',
-						ref:'toolbar',
-						items: this.props.toolbar
-					}),
-					React.DOM.div({
-						key:'editor',
-						ref:'editor',
-						className: 'quill-contents',
-						dangerouslySetInnerHTML: { __html:this.getEditorContents() }
-					})
-				];
-			}
-		},
-	
-		render: function() {
-			return React.DOM.div({
-				className: this.getClassName(),
-				onChange: this.preventDefault },
-				this.renderContents()
-			);
-		},
-	
-		/*
-		Updates the local state with the new contents,
-		executes the change handler passed as props.
-		*/
-		onEditorChange: function(value) {
-			if (value !== this.state.value) {
-				if (this.props.onChange) {
-					this.props.onChange(value);
-				}
-			}
-		},
-	
-		/*
-		Stop change events from the toolbar from
-		bubbling up outside.
-		*/
-		preventDefault: function(event) {
-			event.preventDefault();
-			event.stopPropagation();
-		}
-	
-	});
-	
-	module.exports = QuillComponent;
-
-
-/***/ },
-/* 2 */
-/*!**************************************************************************************!*\
-  !*** external {"commonjs":"react","commonjs2":"react","amd":"react","root":"React"} ***!
-  \**************************************************************************************/
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ },
-/* 3 */
-/*!************************!*\
-  !*** ./src/toolbar.js ***!
-  \************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	
-	var React = __webpack_require__(/*! react */ 2),
-		T = React.PropTypes;
-	
-	var defaultColors = [
-		'rgb(  0,   0,   0)', 'rgb(230,   0,   0)', 'rgb(255, 153,   0)',
-		'rgb(255, 255,   0)', 'rgb(  0, 138,   0)', 'rgb(  0, 102, 204)',
-		'rgb(153,  51, 255)', 'rgb(255, 255, 255)', 'rgb(250, 204, 204)',
-		'rgb(255, 235, 204)', 'rgb(255, 255, 204)', 'rgb(204, 232, 204)',
-		'rgb(204, 224, 245)', 'rgb(235, 214, 255)', 'rgb(187, 187, 187)',
-		'rgb(240, 102, 102)', 'rgb(255, 194, 102)', 'rgb(255, 255, 102)',
-		'rgb(102, 185, 102)', 'rgb(102, 163, 224)', 'rgb(194, 133, 255)',
-		'rgb(136, 136, 136)', 'rgb(161,   0,   0)', 'rgb(178, 107,   0)',
-		'rgb(178, 178,   0)', 'rgb(  0,  97,   0)', 'rgb(  0,  71, 178)',
-		'rgb(107,  36, 178)', 'rgb( 68,  68,  68)', 'rgb( 92,   0,   0)',
-		'rgb(102,  61,   0)', 'rgb(102, 102,   0)', 'rgb(  0,  55,   0)',
-		'rgb(  0,  41, 102)', 'rgb( 61,  20,  10)',
-	].map(function(color){ return { value: color } });
-	
-	var defaultItems = [
-	
-		{ label:'Formats', type:'group', items: [
-			{ label:'Font', type:'font', items: [
-				{ label:'Sans Serif',  value:'sans-serif' },
-				{ label:'Serif',       value:'serif' },
-				{ label:'Monospace',   value:'monospace' }
-			]},
-			{ type:'separator' },
-			{ label:'Size', type:'size', items: [
-				{ label:'Normal',  value:'10px' },
-				{ label:'Smaller', value:'13px' },
-				{ label:'Larger',  value:'18px' },
-				{ label:'Huge',    value:'32px' }
-			]},
-			{ type:'separator' },
-			{ label:'Alignment', type:'align', items: [
-				{ label:'', value:'center' },
-				{ label:'', value:'left' },
-				{ label:'', value:'right' },
-				{ label:'', value:'justify' }
-			]}
-		]},
-	
-		{ label:'Text', type:'group', items: [
-			{ type:'bold', label:'Bold' },
-			{ type:'italic', label:'Italic' },
-			{ type:'strike', label:'Strike' },
-			{ type:'underline', label:'Underline' },
-			{ type:'separator' },
-			{ type:'color', label:'Color', items:defaultColors },
-			{ type:'background', label:'Background color', items:defaultColors },
-		]},
-	
-		{ label:'Blocks', type:'group', items: [
-			{ type:'bullet', label:'Bullet' },
-			{ type:'separator' },
-			{ type:'list', label:'List' }
-		]}
-	
-	];
-	
-	var QuillToolbar = React.createClass({
-	
-		displayName: 'Quill Toolbar',
-	
-		propTypes: {
-			id:        T.string,
-			className: T.string,
-			items:     T.array
-		},
-	
-		getDefaultProps: function(){
-			return {
-				items: defaultItems
-			};
-		},
-	
-		renderSeparator: function(key) {
-			return React.DOM.span({
-				key: key,
-				className:'ql-format-separator'
-			});
-		},
-	
-		renderGroup: function(item, key) {
-			return React.DOM.span({
-				key: item.label || key,
-				className:'ql-format-group' },
-				item.items.map(this.renderItem)
-			);
-		},
-	
-		renderChoiceItem: function(item, key) {
-			return React.DOM.option({
-				key: item.label || item.value || key,
-				value:item.value },
-				item.label
-			);
-		},
-	
-		renderChoices: function(item, key) {
-			return React.DOM.select({
-				key: item.label || key,
-				className: 'ql-'+item.type },
-				item.items.map(this.renderChoiceItem)
-			);
-		},
-	
-		renderAction: function(item, key) {
-			return React.DOM.span({
-				key: item.label || item.value || key,
-				className: 'ql-format-button ql-'+item.type,
-				title: item.label }
-			);
-		},
-	
-		renderItem: function(item, key) {
-			switch (item.type) {
-				case 'separator':
-					return this.renderSeparator(key);
-				case 'group':
-					return this.renderGroup(item, key);
-				case 'font':
-				case 'align':
-				case 'size':
-				case 'color':
-				case 'background':
-					return this.renderChoices(item, key);
-				default:
-					return this.renderAction(item, key);
-			}
-		},
-	
-		getClassName: function() {
-			return 'quill-toolbar ' + (this.props.className||'');
-		},
-	
-		render: function() {
-			return React.DOM.div({
-				className: this.getClassName() },
-				this.props.items.map(this.renderItem)
-			);
-		}
-	
-	});
-	
-	module.exports = QuillToolbar;
-	QuillToolbar.defaultItems = defaultItems;
-	QuillToolbar.defaultColors = defaultColors;
-
-/***/ },
-/* 4 */
-/*!**********************!*\
-  !*** ./src/mixin.js ***!
-  \**********************/
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	
-	var Quill = __webpack_require__(/*! quill */ 5);
-	
-	var QuillMixin = {
-	
-		/**
-		Creates an editor on the given element. The editor will
-		be passed the configuration, have its events bound,
-		*/
-		createEditor: function($el, config) {
-			var editor = new Quill($el, config);
-			this.hookEditor(editor);
-			return editor;
-		},
-	
-		hookEditor: function(editor) {
-			var self = this;
-			editor.on('text-change', function(delta, source) {
-				if (self.onEditorChange) {
-					self.onEditorChange(editor.getHTML(), delta, source);
-				}
-			});
-		},
-	
-		updateEditor: function(editor, config) {
-			// NOTE: This tears the editor down, and reinitializes
-			//       it with the new config. Ugly but necessary
-			//       as there is no api for updating it.
-			this.destroyEditor(editor);
-			this.createEditor(config);
-			return editor;
-		},
-	
-		destroyEditor: function(editor) {
-			editor.destroy();
-		},
-	
-		/*
-		Replace the contents of the editor, but keep
-		the previous selection hanging around so that
-		the cursor won't move.
-		*/
-		setEditorContents: function(editor, value) {
-			var sel = editor.getSelection();
-			editor.setHTML(value);
-			editor.setSelection(sel);
-		}
-	
-	};
-	
-	module.exports = QuillMixin;
-
-/***/ },
-/* 5 */
-/*!**************************************************************************************!*\
-  !*** external {"commonjs":"quill","commonjs2":"quill","amd":"quill","root":"Quill"} ***!
-  \**************************************************************************************/
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
-
-/***/ }
-/******/ ])
-});
-;
-//# sourceMappingURL=react-quill.js.map;
 define('components/documents/NewDocument',['require','jquery','react','react-router','react-bootstrap','react-quill','components/globals/HeaderBar','components/globals/FooterBar'],function(require) {
 
   var $ = require('jquery');
@@ -66028,12 +65959,11 @@ define('components/api/ApiManagement',['require','jquery','lodash','react','reac
   return ApiManagement;
 });
 
-define('components/NoMatch',['require','jquery','react','react-bootstrap','components/globals/HeaderBar','components/globals/FooterBar'],function(require) {
+define('components/NoMatch',['require','jquery','react','components/globals/HeaderBar','components/globals/FooterBar'],function(require) {
 
   var $ = require('jquery');
 
   var React = require('react');
-  var ReactBootstrap = require('react-bootstrap');
 
   var HeaderBar = require('components/globals/HeaderBar');
   var FooterBar = require('components/globals/FooterBar');
@@ -66064,7 +65994,6 @@ define('components/NoMatch',['require','jquery','react','react-bootstrap','compo
     },
 
     render: function() {
-      var Button = ReactBootstrap.Button;
       return (
         React.createElement('div', null, [
           React.createElement(HeaderBar),
@@ -66156,3 +66085,6 @@ define('app',['require','jquery','react','react-router','components/HomePage','c
   });
 
 });
+
+require(["app"]);
+}());

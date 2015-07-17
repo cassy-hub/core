@@ -11,14 +11,14 @@ var cassyhub = require('./cassy-hub');
 // Constants
 var PORT = 80;
 
-var folder = 'public';
+var folder_for_static_content = 'src';
 
 // App
 var app = express();
 app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
-app.use(express.static(folder));
+app.use(express.static(folder_for_static_content));
 app.use(cassyhub.init)
 
 app.set('views', path.join(__dirname, 'views'));
@@ -33,7 +33,7 @@ app.use(stormpath.init(app, {
 }));
 
 app.get('/dev_init.js', function(req, res) {
-    var requirejsdata = require('./public/requirejs.json');
+    var requirejsdata = require('./src/requirejs.json');
     res.send('require.config(' + JSON.stringify(requirejsdata) + '); requirejs([\'jsx!app\']);');
 });
 
@@ -121,7 +121,9 @@ function proxy(req, res) {
 }
 
 app.get('/*', function(req, res) {
-    res.sendfile(folder + '/index.html');
+    res.render('../' + folder_for_static_content + '/index.ejs', {
+      IN_DEVELOPMENT: folder_for_static_content === 'src' ? true : false
+    });
 });
 
 app.listen(PORT);

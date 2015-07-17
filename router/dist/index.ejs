@@ -15,8 +15,11 @@
 
     <div id="cassy"></div>
 
-    <script type="text/javascript" src="bundle.js"></script>
-
+    <% if (IN_DEVELOPMENT) { %>
+      <script type="text/javascript" data-main="dev_init" src="vendor/requirejs/require.js"></script>
+    <% } else { %>
+      <script type="text/javascript" src="bundle.js"></script>
+    <% } %>
   </body>
 
 </html>
