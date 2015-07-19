@@ -22,12 +22,12 @@ app.get(/^\/tree\/(.*)/, function(req, res) {
     var payload = {
         op: 'find',
         match: {
-            'userid': req.headers.userid,
-            'tags': {
-                'regex': query
-            }
+            'userid': req.headers.userid
         }
     };
+    if (req.params[0]) {
+       payload.match.tags = { 'regex': query };
+    }
     console.log(payload);
     request.post({
         uri: 'http://cassyhub-dal:80/documents',
@@ -69,14 +69,16 @@ app.get(/^\/documents\/(.*)/, function(req, res) {
         }
         console.log('API GET result: ', result);
         result = result.body;
-        if (!result) {
+        if (!result[0]) {
             result = 'Document not found';
+        } else {
+            result = result[0].content;
         }
         res.send(result);
     });
 });
 
-app.get(/^\/public\/(.*)/, function(req, res) {
+app.get(/^\/public-docs\/(.*)/, function(req, res) {
     console.log('API GET /documents');
     var payload = {
         op: 'find',
@@ -98,10 +100,41 @@ app.get(/^\/public\/(.*)/, function(req, res) {
         }
         console.log('API GET result: ', result);
         result = result.body;
-        if (!result) {
+        if (!result[0]) {
             result = 'Document not found';
+        } else {
+            result = result[0].content;
         }
         res.send(result);
+    });
+});
+
+app.get(/^\/public-tree\/(.*)/, function(req, res) {
+    console.log('API GET /tree');
+    var query = '^' + _.trimRight(req.params[0], '/') + '\\/';
+    var payload = {
+        op: 'find',
+        match: {
+            'userid': req.headers.userid,
+            'published': true
+        }
+    };
+    if (req.params[0]) {
+       payload.match.tags = { 'regex': query };
+    }
+    console.log(payload);
+    request.post({
+        uri: 'http://cassyhub-dal:80/documents',
+        json: payload
+    }, function(error, dalResult) {
+        if(error) {
+          console.log(error);
+          res.send('error from api -> dal');
+        } else if(dalResult.body) {
+          res.send(require('./treebuilder').buildTree(dalResult.body, 'tags', '/', 'tag'));
+        } else {
+          res.send('Document not found');
+        }
     });
 });
 

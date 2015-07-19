@@ -17,7 +17,8 @@ define(function(require) {
       return {
         title: '',
         tag: '',
-        content: ''
+        content: '',
+        published: false
       };
     },
 
@@ -33,6 +34,10 @@ define(function(require) {
       this.setState({ content: value });
     },
 
+    onPublishChange: function(value) {
+      this.setState({ published: !this.state.published });
+    },
+
     handleClick: function() {
       var self = this;
       $.ajax({
@@ -41,7 +46,8 @@ define(function(require) {
         data: JSON.stringify({
           'title': this.state.title,
           'tags': this.state.tag,
-          'content': this.state.content
+          'content': this.state.content,
+          'published': this.state.published
         }),
         dataType: 'json',
         contentType: 'application/json',
@@ -86,6 +92,14 @@ define(function(require) {
 
             <label>Enter your content:</label>
             <ReactQuill theme='snow' value={this.state.data} onChange={this.onContentChange} />
+            <Input
+                type="checkbox"
+                checked={this.state.published}
+                ref="published"
+                label='Publish'
+                groupClassName='group-class'
+                labelClassName='label-class'
+                onChange={this.onPublishChange} />
             <hr />
             <Button bsStyle='default' onClick={this.handleClick}>Cancel</Button>
             <Button bsStyle='success' className='pull-right' onClick={this.handleClick}>Save Document</Button>

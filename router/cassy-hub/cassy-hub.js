@@ -1,37 +1,51 @@
 var request = require("request");
+var _ = require("lodash");
 
-var request = require('request'),
-    username = "",
-    password = "",
-    url = "http://localhost/api-public/public/";
+var config = {
+    host: "localhost",
+    protocol: "http",
+    port: 80,
+    resetContentInterval: 10,
+    startTag: ""
+};
 
-function config(apiKey) {
-  username = apiKey.id;
-  password = apiKey.secret;
+var contentTree;
+
+function setup(options) {
+   _.extend(config, options);
+   var auth = "Basic " + new Buffer(config.id + ":" + config.secret).toString("base64");
+   var url = config.protocol + "://" + config.host + ":" + config.port + "/api-public/public-tree/" + config.startTag;
+   setInterval(function(){
+       request(
+           {
+             url : url,
+             headers : {
+               "Authorization" : auth
+             }
+           },
+           function (error, response, body) {
+             contentTree = JSON.parse(response.body);
+           }
+       );
+   }, config.resetContentInterval * 1000);
 }
 
 function init(req, res, next) {
-  res.locals.___ = function (tag) {
-    console.log(username)
-    console.log(password)
-    auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
-
-    request(
-        {
-          url : url + tag,
-          headers : {
-            "Authorization" : auth
-          }
-        },
-        function (error, response, body) {
-          callback(JSON.parse(response.body)[0].content);
+  res.locals.___ = function (requested_tag) {
+     var tags = requested_tag.split("/");
+     var child = contentTree;
+     _.each(tags, function(tag, i) {
+        child = _.find(child, {'tag': tag});
+        if (child && i !== tags.length - 1) {
+            child = child.children;
         }
-    );
+     });
+     return (child && child.content) || "Content not found";
   }
   next();
 };
 
 module.exports = {
-  config: config,
+  setup: setup,
   init: init
 }

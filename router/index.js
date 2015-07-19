@@ -19,12 +19,6 @@ app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
 app.use(express.static(folder_for_static_content, {index: 'disabled'}));
 
-cassyhub.config({
-    "id": "4DUBQGZ2OZR6DGUM9FFEO37UI",
-    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU"
-});
-app.use(cassyhub.init);
-
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -35,6 +29,12 @@ app.use(stormpath.init(app, {
     secretKey: 'some_long_random_string',
     enableForgotPassword: true
 }));
+
+cassyhub.setup({
+    "id": "4DUBQGZ2OZR6DGUM9FFEO37UI",
+    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU"
+});
+app.use(cassyhub.init);
 
 app.get('/dev_init.js', function(req, res) {
     var requirejsdata = require('./src/requirejs.json');
@@ -91,7 +91,8 @@ app.delete('/delete-api-key/:apiId', stormpath.loginRequired, function(req, res)
 });
 
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.all(/^\/api-public\/public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-public\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-public\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
 
 function proxy(req, res) {
     var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));
@@ -140,3 +141,6 @@ app.get('*', function(req, res) {
 
 app.listen(PORT);
 console.log('cassy-hub/router running on http://localhost:' + PORT);
+
+
+
