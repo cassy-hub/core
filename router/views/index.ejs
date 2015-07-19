@@ -1,6 +1,20 @@
-<html>
-<body>
-<%- ___('test/boom') %> BLAH
-<%- ___('test/darts/boom') %> BLAH
-</body>
-</html>
+<html><head>
+    <title>Cassy Hub</title>
+    <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./vendor/jquery/dist/jquery.js"></script>
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="vendor/quill/dist/quill.base.css">
+    <link rel="stylesheet" type="text/css" href="vendor/quill/dist/quill.snow.css">
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500,700,900">
+
+    <link rel="stylesheet" type="text/css" href="assets/css/core.css">
+  </head>
+
+  <body>
+  <div><nav role="navigation" class="navbar navbar-default"><div class="container">
+  <div class="navbar-header"><span class="navbar-brand">Cassy Hub</span></div>
+  <ul class="nav navbar-nav"><li role="presentation" class=""><a href="/">Home</a></li><li role="presentation" class="">
+  <a href="/login">Login</a></li><li role="presentation" class=""><a href="/register">Register</a></li>
+  <li role="presentation" class=""><a href="/help">Help</a></li></ul></div></nav><div class="container content">
+  <h3><%- ___('home/title') %></h3>
+  <%- ___('home/description') %>
+  </div><footer class="footer"></footer></div></body></html>

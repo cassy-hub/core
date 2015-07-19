@@ -13,6 +13,7 @@ var dbURL = 'mongodb://cassyhub-db:27017/cassy';
 var app = express();
 app.use(bodyParser.json());
 
+require('./insertDefaultContent')();
 
 app.post('/:collectionName', function(req, res) {
     console.log("DAL request received for POST '/:collectionName': " + req.path);
