@@ -16,7 +16,8 @@
   },
   "dependencies": {
     "request": "*",
-    "lodash": "*"
+    "lodash": "*",
+    "locale" : "*"
   },
   "engines": {
     "node": ">=0.8.0"

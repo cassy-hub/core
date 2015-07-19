@@ -32,7 +32,8 @@ app.use(stormpath.init(app, {
 
 cassyhub.setup({
     "id": "4DUBQGZ2OZR6DGUM9FFEO37UI",
-    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU"
+    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU",
+    "language": true
 });
 app.use(cassyhub.init);
 
@@ -52,6 +53,11 @@ app.get('/get-api-keys', stormpath.loginRequired, function(req, res) {
 });
 
 app.get('/test', function (req, res) {
+    res.render("index");
+});
+
+app.get('/test-es', function (req, res) {
+    req.setLocale("es");
     res.render("index");
 });
 
