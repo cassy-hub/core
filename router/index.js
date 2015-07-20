@@ -27,7 +27,8 @@ app.use(stormpath.init(app, {
     apiKeySecret: 'KyTW5BNTFASZf792fGHUKyTG7vMJI16fhpFXK67sE8A',
     application: 'https://api.stormpath.com/v1/applications/4nNuaKjuY29IG8HhvcC0QG',
     secretKey: 'some_long_random_string',
-    enableForgotPassword: true
+    enableForgotPassword: true,
+    redirectUrl: '/dashboard'
 }));
 
 cassyhub.setup({
@@ -52,11 +53,11 @@ app.get('/get-api-keys', stormpath.loginRequired, function(req, res) {
     });
 });
 
-app.get('/test', function (req, res) {
+app.get('/', function (req, res) {
     res.render("index");
 });
 
-app.get('/test-es', function (req, res) {
+app.get('/es', function (req, res) {
     req.setLocale("es");
     res.render("index");
 });
@@ -135,7 +136,10 @@ function proxy(req, res) {
     });
 }
 
-app.get('*', function(req, res) {
+app.get('/dashboard', dashboard);
+app.get('*', dashboard);
+
+function dashboard(req, res) {
   fs.readFile(folder_for_static_content + '/index.html', 'utf8', function (err, html) {
       if (err) { throw err; }
       html = _.template(html)({ IN_PRODUCTION: folder_for_static_content === 'src' ? false : true });
@@ -143,7 +147,7 @@ app.get('*', function(req, res) {
       res.write(html);
       res.end();
   });
-});
+}
 
 app.listen(PORT);
 console.log('cassy-hub/router running on http://localhost:' + PORT);

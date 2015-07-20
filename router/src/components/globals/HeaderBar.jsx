@@ -19,7 +19,7 @@ define(function(require) {
       var logo = (
           <span className="logo">
               <img src="favicon.ico" className="pull-left" />
-              <Link to="/">
+              <Link to="/dashboard">
                 Cassy<strong>Hub</strong>
               </Link>
           </span>
@@ -32,7 +32,7 @@ define(function(require) {
         return (
           <Navbar brand={logo}>
             <Nav>
-              <NavItemLink to="/">Home</NavItemLink>
+              <NavItemLink to="/dashboard">Home</NavItemLink>
               <DropdownButton eventKey={3} title='Content'>
                 <NavItemLink to="/document/new">Create new document</NavItemLink>
                 <NavItemLink to="/documents">List all document</NavItemLink>
