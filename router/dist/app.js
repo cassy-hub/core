@@ -12,6 +12,7 @@ define(function(require) {
   var HomePage = require('components/HomePage');
   var MemberHome = require('components/MemberHome');
   var NewDocument = require('components/documents/NewDocument');
+  var EditDocument = require('components/documents/EditDocument');
   var ListDocuments = require('components/documents/ListDocuments');
   var ApiManagement = require('components/api/ApiManagement');
   var NoMatch = require('components/NoMatch');
@@ -35,14 +36,15 @@ define(function(require) {
     success: function(data) {
       var homePage;
       if (data) {
-        homePage = (React.createElement(Route, {name: "home", path: "/", handler: MemberHome}));
+        homePage = (React.createElement(Route, {name: "home", path: "/dashboard", handler: MemberHome}));
       } else {
-        homePage = (React.createElement(Route, {name: "home", path: "/", handler: HomePage}));
+        homePage = (React.createElement(Route, {name: "home", path: "/dashboard", handler: HomePage}));
       }
       var routes = (
-        React.createElement(Route, {name: "app", path: "/", handler: App}, [
+        React.createElement(Route, {name: "app", path: "/dashboard", handler: App}, [
           homePage,
           React.createElement(Route, {name: "new-document", path: "/document/new", handler: NewDocument}),
+          React.createElement(Route, {name: "edit-document", path: "/document/:documentTags*", handler: EditDocument}),
           React.createElement(Route, {name: "list-document", path: "/documents", handler: ListDocuments}),
           React.createElement(Route, {name: "api-list", path: "/my-api/list", handler: ApiManagement}),
           React.createElement(DefaultRoute, {handler: NoMatch})

@@ -19,7 +19,7 @@ define(function(require) {
       var logo = (
           React.createElement('span', {className: "logo"}, [
               React.createElement('img', {src: "favicon.ico", className: "pull-left"}),
-              React.createElement(Link, {to: "/"}, [
+              React.createElement(Link, {to: "/dashboard"}, [
                 "Cassy", React.createElement('strong', null, ["Hub"])
               ])
           ])
@@ -31,14 +31,10 @@ define(function(require) {
         return (
           React.createElement(Navbar, {brand: logo}, [
             React.createElement(Nav, null, [
-              React.createElement(NavItemLink, {to: "/"}, ["Home"]),
+              React.createElement(NavItemLink, {to: "/dashboard"}, ["Home"]),
               React.createElement(DropdownButton, {eventKey: 3, title: "Content"}, [
                 React.createElement(NavItemLink, {to: "/document/new"}, ["Create new document"]),
-                React.createElement(NavItemLink, {to: "/documents"}, ["List all document"]),
-                React.createElement(MenuItem, {divider: true}),
-                React.createElement(MenuItem, {eventKey: "1"}, ["Document 1"]),
-                React.createElement(MenuItem, {eventKey: "2"}, ["Document 2"]),
-                React.createElement(MenuItem, {eventKey: "3"}, ["Document 3"])
+                React.createElement(NavItemLink, {to: "/documents"}, ["List all document"])
               ]),
               React.createElement(DropdownButton, {eventKey: 4, title: "Account"}, [
                 React.createElement(NavItemLink, {to: "/my-api/list"}, ["Api Keys"]),

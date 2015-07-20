@@ -12,6 +12,7 @@ define(function(require) {
   var HomePage = require('jsx!components/HomePage');
   var MemberHome = require('jsx!components/MemberHome');
   var NewDocument = require('jsx!components/documents/NewDocument');
+  var EditDocument = require('jsx!components/documents/EditDocument');
   var ListDocuments = require('jsx!components/documents/ListDocuments');
   var ApiManagement = require('jsx!components/api/ApiManagement');
   var NoMatch = require('jsx!components/NoMatch');
@@ -43,6 +44,7 @@ define(function(require) {
         <Route name="app" path="/dashboard" handler={App}>
           {homePage}
           <Route name="new-document" path="/document/new" handler={NewDocument}/>
+          <Route name="edit-document" path="/document/:documentTags*" handler={EditDocument}/>
           <Route name="list-document" path="/documents" handler={ListDocuments}/>
           <Route name="api-list" path="/my-api/list" handler={ApiManagement}/>
           <DefaultRoute handler={NoMatch}/>

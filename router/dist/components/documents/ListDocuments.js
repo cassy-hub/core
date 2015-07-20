@@ -5,8 +5,6 @@ define(function(require) {
   var ReactBootstrap = require('react-bootstrap');
   var ReactRouterBootstrap = require('react-router-bootstrap');
 
-  var Navigation = ReactRouter.Navigation;
-
   var $ = require('jquery');
   var _ = require('lodash');
 
@@ -18,7 +16,7 @@ define(function(require) {
   var Link = ReactRouter.Link;
 
   var ListDocuments = React.createClass({
-    mixins: [Navigation],
+    mixins: [ReactRouter.Navigation],
 
     getInitialState: function() {
       return {
@@ -33,9 +31,16 @@ define(function(require) {
           if (document.children.length > 0) {
               document.nodes = self.presentDocumentsToTree(document.children);
           }
-
+          var path = "/document/" + document.tags;
+          var text;
+          if (document._id) {
+            text = (React.createElement('a', {href: path, onClick: function() { self.transitionTo(path); return false; }}, [document.text]));
+          } else {
+            text = "Untitled";
+          }
           return {
-              text: (React.createElement('a', {href: "/document/new", onClick: function() { self.transitionTo('/document/new'); return false; }}, [document.text])),
+              id: document._id,
+              text: text,
               nodes: document.nodes
           };
       });

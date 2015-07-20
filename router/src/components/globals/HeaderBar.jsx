@@ -35,10 +35,6 @@ define(function(require) {
               <DropdownButton eventKey={3} title='Content'>
                 <NavItemLink to="/document/new">Create new document</NavItemLink>
                 <NavItemLink to="/documents">List all document</NavItemLink>
-                <MenuItem divider />
-                <MenuItem eventKey='1'>Document 1</MenuItem>
-                <MenuItem eventKey='2'>Document 2</MenuItem>
-                <MenuItem eventKey='3'>Document 3</MenuItem>
               </DropdownButton>
               <DropdownButton eventKey={4} title='Account'>
                 <NavItemLink to="/my-api/list">Api Keys</NavItemLink>
