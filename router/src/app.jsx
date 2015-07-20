@@ -35,12 +35,12 @@ define(function(require) {
     success: function(data) {
       var homePage;
       if (data) {
-        homePage = (<Route name="home" path="/" handler={MemberHome}/>);
+        homePage = (<Route name="home" path="/dashboard" handler={MemberHome}/>);
       } else {
-        homePage = (<Route name="home" path="/" handler={HomePage}/>);
+        homePage = (<Route name="home" path="/dashboard" handler={HomePage}/>);
       }
       var routes = (
-        <Route name="app" path="/" handler={App}>
+        <Route name="app" path="/dashboard" handler={App}>
           {homePage}
           <Route name="new-document" path="/document/new" handler={NewDocument}/>
           <Route name="list-document" path="/documents" handler={ListDocuments}/>
