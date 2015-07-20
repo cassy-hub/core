@@ -78,6 +78,47 @@ app.get(/^\/documents\/(.*)/, function(req, res) {
     });
 });
 
+app.get("/stats", function(req, res) {
+    console.log('API GET /documents');
+    var payload = {
+        op: 'find',
+        match: {
+        }
+    };
+
+    request.post({
+        uri: 'http://cassyhub-dal:80/documents',
+        json: payload
+    }, function(error, result) {
+        if (error) {
+            console.log(error);
+            res.send('error from api -> dal');
+            return;
+        }
+        result = result.body;
+        var payload2 = {
+                op: 'distinct',
+                match: {
+                },
+                field: "userid"
+        };
+
+        request.post({
+            uri: 'http://cassyhub-dal:80/documents',
+            json: payload2
+        }, function(err, result2) {
+            if (error) {
+                console.log(error);
+                res.send('error from api -> dal');
+                return;
+            }
+            console.log('API GET result: ', result2.body);
+            result2 = result2.body;
+            res.send({totalDocs: result.length, usersWithContent: result2.length});
+        });
+    });
+});
+
 app.get(/^\/public-docs\/(.*)/, function(req, res) {
     console.log('API GET /documents');
     var payload = {
