@@ -25,7 +25,6 @@ define(function(require) {
           </span>
         );
 
-
       var NavItemLink = ReactRouterBootstrap.NavItemLink;
 
       if (user) {

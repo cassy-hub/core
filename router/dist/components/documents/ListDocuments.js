@@ -1,27 +1,45 @@
 define(function(require) {
 
   var React = require('react');
+  var ReactRouter = require('react-router');
+  var ReactBootstrap = require('react-bootstrap');
+  var ReactRouterBootstrap = require('react-router-bootstrap');
+
+  var Navigation = ReactRouter.Navigation;
+
   var $ = require('jquery');
   var _ = require('lodash');
 
   var HeaderBar = require('components/globals/HeaderBar');
   var FooterBar = require('components/globals/FooterBar');
 
-  var TreeView = require('react-bootstrap-treeview').TreeView;
+  var TreeFolder = require('components/treeview/TreeFolder');
 
-function presentDocumentsToTree(documents) {
-  var documentTree = _.map(documents, function(document) {
-    console.log(document);
-  });
-  return documents;
-}
+  var Link = ReactRouter.Link;
 
   var ListDocuments = React.createClass({
+    mixins: [Navigation],
 
     getInitialState: function() {
       return {
-        documents: []
+        treeData: null
       };
+    },
+
+    presentDocumentsToTree: function(documents) {
+      var self = this;
+      var documentTree = _.map(documents, function(document) {
+          document.text = document.title || 'Untitled';
+          if (document.children.length > 0) {
+              document.nodes = self.presentDocumentsToTree(document.children);
+          }
+
+          return {
+              text: (React.createElement('a', {href: "/document/new", onClick: function() { self.transitionTo('/document/new'); return false; }}, [document.text])),
+              nodes: document.nodes
+          };
+      });
+      return documentTree;
     },
 
     componentDidMount: function() {
@@ -30,7 +48,8 @@ function presentDocumentsToTree(documents) {
           dataType: 'json',
           cache: false,
           success: function(data) {
-            this.setState({documentTree: presentDocumentsToTree(data) });
+            var treeData = this.presentDocumentsToTree(data);
+            this.setState({treeData: treeData });
           }.bind(this),
           error: function(xhr, status, err) {
             console.error(this.props.url, status, err.toString());
@@ -41,50 +60,13 @@ function presentDocumentsToTree(documents) {
     render: function() {
       var user = this.props.user;
 
-
-
-      var data = [
-        {
-          text: 'Parent 1',
-          nodes: [
-            {
-              text: 'Child 1',
-              nodes: [
-                {
-                  text: 'Grandchild 1'
-                },
-                {
-                  text: 'Grandchild 2'
-                }
-              ]
-            },
-            {
-              text: 'Child 2'
-            }
-          ]
-        },
-        {
-          text: 'Parent 2'
-        },
-        {
-          text: 'Parent 3'
-        },
-        {
-          text: 'Parent 4'
-        },
-        {
-          text: 'Parent 5'
-        }
-      ];
-
-
       return (
         React.createElement('div', null, [
           React.createElement(HeaderBar, {user: user}),
           React.createElement('div', {className: "container content"}, [
             React.createElement('h3', null, ["Listing your ", React.createElement('strong', null, ["Documents"])]),
             React.createElement('p', null, ["This is a list of all the documents you have created. Click on one to edit the document."]),
-            React.createElement(TreeView, {data: data})
+            React.createElement(TreeFolder, {data: this.state.treeData, levels: 3})
           ]),
           React.createElement(FooterBar)
         ])

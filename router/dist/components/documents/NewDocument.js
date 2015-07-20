@@ -17,7 +17,8 @@ define(function(require) {
       return {
         title: '',
         tag: '',
-        content: ''
+        content: '',
+        published: false
       };
     },
 
@@ -33,17 +34,23 @@ define(function(require) {
       this.setState({ content: value });
     },
 
+    onPublishChange: function(value) {
+      this.setState({ published: !this.state.published });
+    },
+
     handleClick: function() {
       var self = this;
       $.ajax({
         url: '/api/documents',
         method: 'post',
-        data: {
+        data: JSON.stringify({
           'title': this.state.title,
           'tags': this.state.tag,
-          'content': this.state.content
-        },
+          'content': this.state.content,
+          'published': this.state.published
+        }),
         dataType: 'json',
+        contentType: 'application/json',
         success: function() {
           self.transitionTo('/');
         },
@@ -85,6 +92,14 @@ define(function(require) {
 
             React.createElement('label', null, ["Enter your content:"]),
             React.createElement(ReactQuill, {theme: "snow", value: this.state.data, onChange: this.onContentChange}),
+            React.createElement(Input, {
+                type: "checkbox",
+                checked: this.state.published,
+                ref: "published",
+                label: "Publish",
+                groupClassName: "group-class",
+                labelClassName: "label-class",
+                onChange: this.onPublishChange}),
             React.createElement('hr'),
             React.createElement(Button, {bsStyle: "default", onClick: this.handleClick}, ["Cancel"]),
             React.createElement(Button, {bsStyle: "success", className: "pull-right", onClick: this.handleClick}, ["Save Document"])
