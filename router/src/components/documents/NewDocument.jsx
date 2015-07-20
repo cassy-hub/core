@@ -52,7 +52,7 @@ define(function(require) {
         dataType: 'json',
         contentType: 'application/json',
         success: function() {
-          self.transitionTo('/');
+          self.transitionTo('/dashboard');
         },
         error: function(xhr, status, err) {
           console.log(status, err.toString());
