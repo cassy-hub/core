@@ -37,6 +37,9 @@ app.post('/:collectionName', function(req, res) {
                 case "unset":
                     return unsetDocuments(db, collectionName, parseMatch(body.match))
                     break;
+                case "distinct":
+                    return distinctDocuments(db, collectionName, body.field, parseMatch(body.match))
+                    break;
                 default:
                     console.log("unknown DAL op: ", body.op);
                     res.send(false);
@@ -62,6 +65,21 @@ var findDocuments = function(db, collectionName, match) {
     console.log(match);
     console.log("");
     db.collection(collectionName).find(match).toArray(function(err, result) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(result);
+        }
+    });
+    return deferred.promise;
+};
+
+var distinctDocuments = function(db, collectionName, field, match) {
+    var deferred = q.defer();
+    console.log("");
+    console.log(match);
+    console.log("");
+    db.collection(collectionName).distinct(field, match, function(err, result) {
         if (err) {
             deferred.reject(err);
         } else {
