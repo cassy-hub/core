@@ -24,7 +24,7 @@ var defaultDocs = [
    },
    {
        "_id": "55ab95e73d1127170083ddac",
-       "title": "english",
+       "title": "spanish",
        "tags": "home/title/es/",
        "content": "\nBienvenido a <strong>Cassy Hub</strong>\n",
        "published": true,
@@ -32,7 +32,7 @@ var defaultDocs = [
     },
     {
       "_id": "55ab95e73d1127170083ddab",
-      "title": "english",
+      "title": "spanish",
       "tags": "home/description/es/",
       "content": "\nCrear una cuenta para tener acceso a la bondad\n",
       "published": true,

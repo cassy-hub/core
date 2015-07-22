@@ -27,7 +27,7 @@ define(function(require) {
     presentDocumentsToTree: function(documents) {
       var self = this;
       var documentTree = _.map(documents, function(document) {
-          document.text = document.title || 'Untitled';
+          document.text = document.title || document.tag || 'Untitled';
           if (document.children.length > 0) {
               document.nodes = self.presentDocumentsToTree(document.children);
           }
@@ -36,7 +36,7 @@ define(function(require) {
           if (document._id) {
             text = (<a href={path} onClick={function() { self.transitionTo(path); return false; } }>{document.text}</a>);
           } else {
-            text = "Untitled";
+            text = document.tag;
           }
           return {
               id: document._id,
