@@ -188,10 +188,13 @@ app.post('/documents', function(req, res) {
         req.body.tags = req.body.tags.substring(1);
     }
     var payload = {
-        op: 'insert',
-        doc: req.body
+        op: 'find',
+        match: {
+            'userid': req.headers.userid,
+            'tags': req.body.tags
+        }
     };
-    payload.doc.userid = req.headers.userid;
+
     request.post({
         uri: 'http://cassyhub-dal:80/documents',
         json: payload
@@ -201,7 +204,29 @@ app.post('/documents', function(req, res) {
             res.send('error from api -> dal');
             return;
         }
-        res.send(result.body);
+        console.log('API GET result: ', result.body);
+        result = result.body;
+        if (!result[0]) {
+            console.log('POSTING DOC');
+            var payload2 = {
+                op: 'insert',
+                doc: req.body
+            };
+            payload2.doc.userid = req.headers.userid;
+            request.post({
+                uri: 'http://cassyhub-dal:80/documents',
+                json: payload2
+            }, function(error2, result2) {
+                if (error2) {
+                    console.log(error2);
+                    res.send('error from api -> dal');
+                    return;
+                }
+                res.send(result2.body);
+            });
+        } else {
+            res.send('Document which tag already exists');
+        }
     });
 });
 
