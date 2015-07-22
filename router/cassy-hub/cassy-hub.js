@@ -14,11 +14,15 @@ var config = {
 
 var contentTree;
 var supported;
+var gotTree = false;
+var auth;
+var cassyhub;
 
 function setup(options) {
    _.extend(config, options);
-   var auth = "Basic " + new Buffer(config.id + ":" + config.secret).toString("base64");
-   var url = config.protocol + "://" + config.host + ":" + config.port + "/api-public/public-tree/" + config.startTag;
+   auth = "Basic " + new Buffer(config.id + ":" + config.secret).toString("base64");
+   cassyhub = config.protocol + "://" + config.host + ":" + config.port;
+   var url = cassyhub + "/api-public/public-tree/" + config.startTag;
    setInterval(function(){
        request(
            {
@@ -29,6 +33,7 @@ function setup(options) {
            },
            function (error, response, body) {
              contentTree = JSON.parse(response.body);
+             gotTree = true;
            }
        );
    }, config.resetContentInterval * 1000);
@@ -59,7 +64,31 @@ function init(req, res, next) {
             child = child.children;
         }
      });
-     return (child && child.content) || "Content not found";
+     var content;
+     if (child && (child.content !== undefined)) {
+        content = child.content
+     } else {
+        content = "Content not found";
+        if (gotTree) {
+          request(
+             {
+               method: "POST",
+               url : cassyhub + "/api-public/documents",
+               headers : {
+                 "Authorization" : auth
+               },
+               json: {
+                "tags": requested_tag,
+                "content": "",
+                "published": true
+               }
+             },
+             function (error, response, body) {
+             }
+          );
+        }
+     }
+     return content;
   }
   next();
 };

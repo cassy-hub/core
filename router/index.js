@@ -100,6 +100,7 @@ app.delete('/delete-api-key/:apiId', stormpath.loginRequired, function(req, res)
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
 app.all(/^\/api-public\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
 app.all(/^\/api-public\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
 
 function proxy(req, res) {
     var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));

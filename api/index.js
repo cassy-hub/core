@@ -184,6 +184,9 @@ app.post('/documents', function(req, res) {
     if (!_.endsWith(req.body.tags, '/')) {
         req.body.tags += '/';
     }
+    if (_.startsWith(req.body.tags, '/')) {
+        req.body.tags = req.body.tags.substring(1);
+    }
     var payload = {
         op: 'insert',
         doc: req.body
