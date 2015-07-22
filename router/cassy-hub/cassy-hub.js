@@ -22,7 +22,7 @@ function setup(options) {
    _.extend(config, options);
    auth = "Basic " + new Buffer(config.id + ":" + config.secret).toString("base64");
    cassyhub = config.protocol + "://" + config.host + ":" + config.port;
-   var url = cassyhub + "/api-public/public-tree/" + config.startTag;
+   var url = cassyhub + "/api-private/public-tree/" + config.startTag;
    setInterval(function(){
        request(
            {
@@ -73,7 +73,7 @@ function init(req, res, next) {
           request(
              {
                method: "POST",
-               url : cassyhub + "/api-public/documents",
+               url : cassyhub + "/api-private/documents",
                headers : {
                  "Authorization" : auth
                },

@@ -23,8 +23,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(stormpath.init(app, {
-    apiKeyId: '4I5B71C5G3FZOLO7RYJVMAWAT',
-    apiKeySecret: 'KyTW5BNTFASZf792fGHUKyTG7vMJI16fhpFXK67sE8A',
+    apiKeyId: '',
+    apiKeySecret: '',
     application: 'https://api.stormpath.com/v1/applications/4nNuaKjuY29IG8HhvcC0QG',
     secretKey: 'some_long_random_string',
     enableForgotPassword: true,
@@ -98,15 +98,24 @@ app.delete('/delete-api-key/:apiId', stormpath.loginRequired, function(req, res)
 });
 
 app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.all(/^\/api-public\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
-app.all(/^\/api-public\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
-app.all(/^\/api-public\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-private\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-private\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-private\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
+app.all(/^\/api-public\/public-docs\/(.*)/, proxy);
+app.all(/^\/api-public\/public-tree\/(.*)/, proxy);
+
 
 function proxy(req, res) {
     var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));
     console.log('Router proxy forwarding to ' + url);
 
-    var userID = req.user.href.split('/').pop();
+    var userID;
+    if (req.user) {
+      userID = req.user.href.split('/').pop();
+    } else {
+      userID = req.headers.userid || "no_user";
+    }
+    console.log(userID);
     var options = {
         url: url,
         method: req.method,
