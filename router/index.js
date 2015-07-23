@@ -97,25 +97,31 @@ app.delete('/delete-api-key/:apiId', stormpath.loginRequired, function(req, res)
     });
 });
 
-app.all(/^\/api\/(.*)/, stormpath.loginRequired, proxy);
-app.all(/^\/api-private\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
-app.all(/^\/api-private\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
-app.all(/^\/api-private\/(.*)/, stormpath.apiAuthenticationRequired, proxy);
-app.all(/^\/api-public\/public-docs\/(.*)/, proxy);
-app.all(/^\/api-public\/public-tree\/(.*)/, proxy);
+app.all(/^\/api\/(.*)/, stormpath.loginRequired, privateProxy);
+app.all(/^\/api-private\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
+app.all(/^\/api-private\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
+app.all(/^\/api-private\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
+app.all(/^\/api-public\/public-docs\/(.*)/, publicProxy);
+app.all(/^\/api-public\/public-tree\/(.*)/, publicProxy);
 
 
-function proxy(req, res) {
+function privateProxy(req, res) {
     var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));
     console.log('Router proxy forwarding to ' + url);
 
-    var userID;
-    if (req.user) {
-      userID = req.user.href.split('/').pop();
-    } else {
-      userID = req.headers.userid || "no_user";
-    }
-    console.log(userID);
+    var userID = req.user.href.split('/').pop();
+    proxy(req, res, userID, url);
+}
+
+function publicProxy(req, res) {
+    var url = 'http://cassyhub-api:80' + req.url.substring(req.url.indexOf('/', 1));
+    console.log('Router proxy forwarding to ' + url);
+
+    var userID = req.headers.publickey || "no_user";
+    proxy(req, res, userID, url);
+}
+
+function proxy(req, res, userID, url) {
     var options = {
         url: url,
         method: req.method,
