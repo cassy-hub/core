@@ -48,8 +48,9 @@ app.get('/get-user', function(req, res) {
 });
 
 app.get('/get-api-keys', stormpath.loginRequired, function(req, res) {
+    var publicKey = req.user.href.split('/').pop();
     res.locals.user.getApiKeys(function(err, collectionResult) {
-        res.send(collectionResult);
+        res.send({privateKeys: collectionResult, publicKey: publicKey});
     });
 });
 

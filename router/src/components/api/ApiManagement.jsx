@@ -11,7 +11,7 @@ define(function(require) {
 
   var ApiManagement = React.createClass({
     getInitialState: function() {
-      return {apiKeys: []};
+      return {apiKeys: [], publicKey: ""};
     },
 
     deleteApiKey: function(apiKey) {
@@ -49,7 +49,8 @@ define(function(require) {
         dataType: 'json',
         cache: false,
         success: function(data) {
-          this.setState({apiKeys: data.items});
+          this.setState({apiKeys: data.privateKeys.items});
+          this.setState({publicKey: data.publicKey});
         }.bind(this),
         error: function(xhr, status, err) {
           console.error(this.props.url, status, err.toString());
@@ -79,7 +80,8 @@ define(function(require) {
           <div className="container content">
             <Button bsStyle="success" onClick={this.onGenerateClick} className="pull-right button-in-header">Generate Api Key</Button>
             <h3>Manage your <strong>API Keys</strong></h3>
-            <p>Find a list of all your API keys here</p>
+            <p>Your public API key is: <strong>{this.state.publicKey}</strong></p>
+            <p>Find a list of all your private API keys here</p>
             <Table responsive bordered>
               <thead>
                 <tr>
