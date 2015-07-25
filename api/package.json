@@ -11,7 +11,8 @@
         "request": "^2.58.0",
         "body-parser": "~1.13.2",
         "lodash": "*",
-        "key-del": "*"
+        "key-del": "*",
+        "q": "~1.4.1"
     },
     "scripts": {
         "start": "pm2 start process.json --watch"

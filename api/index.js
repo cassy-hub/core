@@ -2,6 +2,7 @@ var express = require('express');
 var request = require('request');
 var bodyParser = require('body-parser');
 var _ = require('lodash');
+var q = require('q');
 
 // Constants
 var PORT = 80;
@@ -9,6 +10,26 @@ var PORT = 80;
 // App
 var app = express();
 app.use(bodyParser.json());
+
+function dalClient(payload) {
+    var deferred = q.defer();
+    request.post({
+        uri: 'http://cassyhub-dal:80/documents',
+        json: payload
+    }, function(err, result) {
+        if (err) {
+            deferred.reject(err);
+        } else {
+            deferred.resolve(result);
+        }
+    });
+    return deferred.promise;
+}
+
+var errorFunc = function(err) {
+    console.log(err);
+    res.send('error from api -> dal');
+}
 
 app.get('/_test', function(req, res) {
     res.send('Hi! The time is: ' + new Date().toString());
@@ -29,19 +50,15 @@ app.get(/^\/tree\/(.*)/, function(req, res) {
        payload.match.tags = { 'regex': query };
     }
     console.log(payload);
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, dalResult) {
-        if(error) {
-          console.log(error);
-          res.send('error from api -> dal');
-        } else if(dalResult.body) {
-          res.send(require('./treebuilder').buildTree(dalResult.body, 'tags', '/', 'tag'));
-        } else {
-          res.send('Document not found');
-        }
-    });
+    dalClient(payload)
+        .then(function(result) {
+             if(result.body) {
+               res.send(require('./treebuilder').buildTree(result.body, 'tags', '/', 'tag'));
+             } else {
+               res.send('Document not found');
+             }
+         })
+         .catch(errorFunc)
 });
 
 
@@ -58,24 +75,18 @@ app.get(/^\/documents\/(.*)/, function(req, res) {
         }
     };
 
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        console.log('API GET result: ', result);
-        result = result.body;
-        if (!result[0]) {
-            result = 'Document not found';
-        } else {
-            result = result[0].content;
-        }
-        res.send(result);
-    });
+    dalClient(payload)
+        .then(function(result) {
+             console.log('API GET result: ', result);
+             result = result.body;
+             if (!result[0]) {
+                 result = 'Document not found';
+             } else {
+                 result = result[0].content;
+             }
+             res.send(result);
+         })
+         .catch(errorFunc)
 });
 
 app.get("/stats", function(req, res) {
@@ -86,37 +97,23 @@ app.get("/stats", function(req, res) {
         }
     };
 
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        result = result.body;
-        var payload2 = {
-                op: 'distinct',
-                match: {
-                },
-                field: "userid"
-        };
+    dalClient(payload)
+        .then(function(result) {
+             result = result.body;
+             var payload2 = {
+                     op: 'distinct',
+                     match: {
+                     },
+                     field: "userid"
+             };
 
-        request.post({
-            uri: 'http://cassyhub-dal:80/documents',
-            json: payload2
-        }, function(err, result2) {
-            if (error) {
-                console.log(error);
-                res.send('error from api -> dal');
-                return;
-            }
-            console.log('API GET result: ', result2.body);
-            result2 = result2.body;
-            res.send({totalDocs: result.length, usersWithContent: result2.length});
-        });
-    });
+             dalClient(payload2)
+                 .then(function(result) {
+                      result2 = result2.body;
+                      res.send({totalDocs: result.length, usersWithContent: result2.length});
+                  });
+         })
+         .catch(errorFunc)
 });
 
 app.get(/^\/public-docs\/(.*)/, function(req, res) {
@@ -130,24 +127,18 @@ app.get(/^\/public-docs\/(.*)/, function(req, res) {
         }
     };
 
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        console.log('API GET result: ', result);
-        result = result.body;
-        if (!result[0]) {
-            result = 'Document not found';
-        } else {
-            result = result[0].content;
-        }
-        res.send(result);
-    });
+    dalClient(payload)
+        .then(function(result) {
+             console.log('API GET result: ', result);
+             result = result.body;
+             if (!result[0]) {
+                 result = 'Document not found';
+             } else {
+                 result = result[0].content;
+             }
+             res.send(result);
+         })
+         .catch(errorFunc)
 });
 
 app.get(/^\/public-tree\/(.*)/, function(req, res) {
@@ -164,19 +155,15 @@ app.get(/^\/public-tree\/(.*)/, function(req, res) {
        payload.match.tags = { 'regex': query };
     }
     console.log(payload);
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, dalResult) {
-        if(error) {
-          console.log(error);
-          res.send('error from api -> dal');
-        } else if(dalResult.body) {
-          res.send(require('./treebuilder').buildTree(dalResult.body, 'tags', '/', 'tag'));
-        } else {
-          res.send('Document not found');
-        }
-    });
+    dalClient(payload)
+        .then(function(result) {
+             if(result.body) {
+               res.send(require('./treebuilder').buildTree(result.body, 'tags', '/', 'tag'));
+             } else {
+               res.send('Document not found');
+             }
+         })
+         .catch(errorFunc)
 });
 
 app.post('/documents', function(req, res) {
@@ -195,39 +182,26 @@ app.post('/documents', function(req, res) {
         }
     };
 
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        console.log('API GET result: ', result.body);
-        result = result.body;
-        if (!result[0]) {
-            console.log('POSTING DOC');
-            var payload2 = {
-                op: 'insert',
-                doc: req.body
-            };
-            payload2.doc.userid = req.headers.userid;
-            request.post({
-                uri: 'http://cassyhub-dal:80/documents',
-                json: payload2
-            }, function(error2, result2) {
-                if (error2) {
-                    console.log(error2);
-                    res.send('error from api -> dal');
-                    return;
-                }
-                res.send(result2.body);
-            });
-        } else {
-            res.send('Document which tag already exists');
-        }
-    });
+    dalClient(payload)
+        .then(function(result) {
+             console.log('API GET result: ', result.body);
+             result = result.body;
+             if (!result[0]) {
+                 console.log('POSTING DOC');
+                 var payload2 = {
+                     op: 'insert',
+                     doc: req.body
+                 };
+                 payload2.doc.userid = req.headers.userid;
+                 dalClient(payload2)
+                     .then(function(result2) {
+                          res.send(result2.body);
+                     })
+             } else {
+                 res.send('Document with tag already exists');
+             }
+         })
+         .catch(errorFunc)
 });
 
 /***
@@ -247,17 +221,12 @@ app.put('/documents', function(req, res) {
         doc: req.body
     };
     payload.doc.userid = req.headers.userid;
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        res.send(result.body);
-    });
+
+    dalClient(payload)
+        .then(function(result) {
+             res.send(result.body);
+         })
+         .catch(errorFunc)
 });
 
 
@@ -277,17 +246,11 @@ app.delete('/documents', function(req, res) {
             }
         }
     };
-    request.post({
-        uri: 'http://cassyhub-dal:80/documents',
-        json: payload
-    }, function(error, result) {
-        if (error) {
-            console.log(error);
-            res.send('error from api -> dal');
-            return;
-        }
-        res.send(result.body);
-    });
+    dalClient(payload)
+        .then(function(result) {
+             res.send(result.body);
+         })
+         .catch(errorFunc)
 });
 
 
