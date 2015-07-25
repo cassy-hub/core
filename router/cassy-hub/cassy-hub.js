@@ -6,7 +6,8 @@ var config = {
     host: "localhost",
     protocol: "http",
     port: 80,
-    resetContentInterval: 10,
+    initialContentRetrieval: 10,
+    resetContentInterval: 1,
     startTag: "",
     language: false,
     supportedLanguages: ["en", "es"]
@@ -23,23 +24,26 @@ function setup(options) {
    auth = "Basic " + new Buffer(config.id + ":" + config.secret).toString("base64");
    cassyhub = config.protocol + "://" + config.host + ":" + config.port;
    var url = cassyhub + "/api-private/public-tree/" + config.startTag;
-   setInterval(function(){
-       request(
-           {
-             url : url,
-             headers : {
-               "Authorization" : auth
-             }
-           },
-           function (error, response, body) {
-             contentTree = JSON.parse(response.body);
-             gotTree = true;
-           }
-       );
-   }, config.resetContentInterval * 1000);
+   var getTree = function(){
+        request(
+            {
+              url : url,
+              headers : {
+                "Authorization" : auth
+              }
+            },
+            function (error, response, body) {
+              contentTree = JSON.parse(response.body);
+              gotTree = true;
+            }
+        );
+    }
+   setTimeout(getTree, config.initialContentRetrieval * 1000);
+   setInterval(getTree, config.resetContentInterval * 60000);
    if (config.language) {
      supported = new locale.Locales(config.supportedLanguages);
    }
+
 }
 
 function init(req, res, next) {
