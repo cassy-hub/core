@@ -1,6 +1,7 @@
 <html><head>
     <title>Cassy Hub</title>
     <script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="jquery" src="./vendor/jquery/dist/jquery.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/assets/js/cassy-hub.js"></script>
     <link rel="stylesheet" type="text/css" href="vendor/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="vendor/quill/dist/quill.base.css">
     <link rel="stylesheet" type="text/css" href="vendor/quill/dist/quill.snow.css">
@@ -19,4 +20,17 @@
   <%- ___('home/description') %>
   <%- ___('home/whatwedo') %>
   <%- ___('home/whoarewe') %>
-  </div><footer class="footer"></footer></div></body></html>
+
+  <div class="cassy-hub">home/description</div>
+  </div><footer class="footer"></footer></div></body>
+  <script>
+     $( document ).ready(function() {
+         CassyHub.setup({
+            publickey: "6V2Z8bf5ej1Ma4O89tJRhc",
+            language: true
+         });
+         CassyHub.init();
+     });
+  </script>
+
+  </html>
