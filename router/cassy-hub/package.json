@@ -19,6 +19,9 @@
     "lodash": "*",
     "locale" : "*"
   },
+  "devDependencies": {
+    "nock": "*"
+  },
   "engines": {
     "node": ">=0.8.0"
   }
