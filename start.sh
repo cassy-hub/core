@@ -44,4 +44,4 @@ docker run -it --name cassyhub-api -v $DIR/api/:/app/ --link cassyhub-dal:cassyh
 
 # Cassy Router
 docker build -t cassyhub/router ./router/.
-docker run -it --name cassyhub-router -p 80:80 -v $DIR/router/:/app/ --link cassyhub-api:cassyhub-api -d cassyhub/router
+docker run -it --name cassyhub-router -p 80:80 -v $DIR/router/:/app/ -v $DIR/stormpath.json:/app/stormpath.json --link cassyhub-api:cassyhub-api -d cassyhub/router

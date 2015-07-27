@@ -7,6 +7,8 @@ var fs = require('fs');
 var path = require('path');
 var cassyhub = require('./cassy-hub');
 
+var config = require('./stormpath.json');
+
 // Constants
 var PORT = 80;
 
@@ -17,24 +19,26 @@ var app = express();
 app.use(bodyParser.json());
 app.use('/vendor', express.static('node_modules'));
 app.use('/vendor', express.static('bower_components'));
-app.use(express.static(folder_for_static_content, {index: 'disabled'}));
+app.use(express.static(folder_for_static_content, {
+    index: 'disabled'
+}));
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(stormpath.init(app, {
-    apiKeyId: '',
-    apiKeySecret: '',
-    application: 'https://api.stormpath.com/v1/applications/4nNuaKjuY29IG8HhvcC0QG',
+    apiKeyId: config.apiKey,
+    apiKeySecret: config.apiSecret,
+    application: config.application,
     secretKey: 'some_long_random_string',
     enableForgotPassword: true,
     redirectUrl: '/dashboard'
 }));
 
 cassyhub.setup({
-    "id": "4DUBQGZ2OZR6DGUM9FFEO37UI",
-    "secret": "OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU",
-    "language": true
+    'id': '4DUBQGZ2OZR6DGUM9FFEO37UI',
+    'secret': 'OgxX8BTXsxV4cxePezRN+p57pjB5OZW8HMUW9vfBIfU',
+    'language': true
 });
 app.use(cassyhub.init);
 
@@ -50,15 +54,18 @@ app.get('/get-user', function(req, res) {
 app.get('/get-api-keys', stormpath.loginRequired, function(req, res) {
     var publicKey = req.user.href.split('/').pop();
     res.locals.user.getApiKeys(function(err, collectionResult) {
-        res.send({privateKeys: collectionResult, publicKey: publicKey});
+        res.send({
+            privateKeys: collectionResult,
+            publicKey: publicKey
+        });
     });
 });
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
     res.render("index");
 });
 
-app.get('/es', function (req, res) {
+app.get('/es', function(req, res) {
     req.setLocale("es");
     res.render("index");
 });
@@ -157,17 +164,20 @@ app.get('/dashboard', dashboard);
 app.get('*', dashboard);
 
 function dashboard(req, res) {
-  fs.readFile(folder_for_static_content + '/index.html', 'utf8', function (err, html) {
-      if (err) { throw err; }
-      html = _.template(html)({ IN_PRODUCTION: folder_for_static_content === 'src' ? false : true });
-      res.writeHeader(200, {'Content-Type': 'text/html'});
-      res.write(html);
-      res.end();
-  });
+    fs.readFile(folder_for_static_content + '/index.html', 'utf8', function(err, html) {
+        if (err) {
+            throw err;
+        }
+        html = _.template(html)({
+            IN_PRODUCTION: folder_for_static_content === 'src' ? false : true
+        });
+        res.writeHeader(200, {
+            'Content-Type': 'text/html'
+        });
+        res.write(html);
+        res.end();
+    });
 }
 
 app.listen(PORT);
 console.log('cassy-hub/router running on http://localhost:' + PORT);
-
-
-
