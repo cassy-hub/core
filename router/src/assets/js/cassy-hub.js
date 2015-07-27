@@ -9,7 +9,7 @@ var CassyHub = (function () {
          $( ".cassy-hub" ).each(function() {
               var language = (navigator.language || navigator.browserLanguage).split('-')[0];
               var self = this;
-              var reqUrl = "/api-public/public-docs/" + this.dataset.tag;
+              var reqUrl = "http://cassyhub.io:80/api-public/public-docs/" + this.dataset.tag;
               if (config.language) {
                  reqUrl = reqUrl + "/" + language + "/"
               }

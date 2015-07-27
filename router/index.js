@@ -6,6 +6,7 @@ var _ = require('lodash');
 var fs = require('fs');
 var path = require('path');
 var cassyhub = require('./cassy-hub');
+var cors = require('cors');
 
 var config = require('./stormpath.json');
 
@@ -109,8 +110,8 @@ app.all(/^\/api\/(.*)/, stormpath.loginRequired, privateProxy);
 app.all(/^\/api-private\/public-docs\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
 app.all(/^\/api-private\/public-tree\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
 app.all(/^\/api-private\/(.*)/, stormpath.apiAuthenticationRequired, privateProxy);
-app.all(/^\/api-public\/public-docs\/(.*)/, publicProxy);
-app.all(/^\/api-public\/public-tree\/(.*)/, publicProxy);
+app.all(/^\/api-public\/public-docs\/(.*)/, cors(), publicProxy);
+app.all(/^\/api-public\/public-tree\/(.*)/, cors(), publicProxy);
 
 
 function privateProxy(req, res) {

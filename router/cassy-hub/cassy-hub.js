@@ -3,7 +3,7 @@ var _ = require("lodash");
 var locale = require("locale");
 
 var config = {
-    host: "localhost",
+    host: "cassyhub.io",
     protocol: "http",
     port: 80,
     initialContentRetrieval: 10,

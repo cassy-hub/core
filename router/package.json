@@ -22,7 +22,8 @@
     "gulp-replace": "^0.5.3",
     "gulp-requirejs": "^0.1.3",
     "gulp-template": "^3.0.0",
-    "locale" : "*"
+    "locale" : "*",
+    "cors": "*"
   },
   "scripts": {
     "start": "pm2 start process.json --watch",
