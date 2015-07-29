@@ -108,7 +108,7 @@ app.get("/stats", function(req, res) {
              };
 
              dalClient(payload2)
-                 .then(function(result) {
+                 .then(function(result2) {
                       result2 = result2.body;
                       res.send({totalDocs: result.length, usersWithContent: result2.length});
                   });
